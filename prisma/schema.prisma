@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  email           String           @unique
+  first_name      String
+  last_name       String
+  password        String
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  active          Boolean          @default(true)
+  projects        Project[]
+  taskAssignments TaskAssignment[]
+
+  @@map("users")
+}
+
+model Stage {
+  id            Int            @id @default(autoincrement())
+  name          String
+  sequence      Int
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  active        Boolean        @default(true)
+  tasks         Task[]
+  projectStages ProjectStage[]
+
+  @@map("stages")
+}
+
+model Project {
+  id            Int            @id @default(autoincrement())
+  name          String
+  description   String?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  active        Boolean        @default(true)
+  owner_id      Int
+  owner         User           @relation(fields: [owner_id], references: [id])
+  tasks         Task[]
+  projectStages ProjectStage[]
+
+  @@map("projects")
+}
+
+model ProjectStage {
+  id         Int @id @default(autoincrement())
+  project_id Int
+  stage_id   Int
+
+  project Project @relation(fields: [project_id], references: [id])
+  stage   Stage   @relation(fields: [stage_id], references: [id])
+
+  @@unique([project_id, stage_id])
+  @@map("project_stages")
+}
+
+model TaskAssignment {
+  id          Int      @id @default(autoincrement())
+  task_id     Int
+  user_id     Int
+  assigned_at DateTime @default(now())
+  task        Task     @relation(fields: [task_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id])
+
+  @@unique([task_id, user_id])
+  @@map("task_assignments")
+}
+
+model Task {
+  id              Int              @id @default(autoincrement())
+  sequence        Int              @default(1)
+  priority        Int              @default(0)
+  name            String
+  description     String?
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  active          Boolean          @default(true)
+  stage_id        Int?
+  stage           Stage?           @relation(fields: [stage_id], references: [id])
+  project_id      Int
+  project         Project          @relation(fields: [project_id], references: [id])
+  deadline        DateTime?
+  status          TaskStatus       @default(IN_PROGRESS)
+  taskAssignments TaskAssignment[]
+
+  @@map("tasks")
+  @@index([project_id])
+}
+
+enum TaskStatus {
+  APPROVED
+  IN_PROGRESS
+  CHANGE_REQUESTED
+  DONE
+}
