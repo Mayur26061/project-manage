@@ -1,18 +1,19 @@
-import type { Response, Request } from "express";
-import asyncHandler from "express-async-handler";
+import type { Response } from "express";
 import z from "zod";
 import { prisma } from "../lib/prisma.js";
+import { asyncHandler, type reqObj } from "../utils.js";
 
 export const getProjects = asyncHandler(
-  async (_req: Request, res: Response) => {
+  async (_req: reqObj, res: Response) => {
     const projects = await prisma.project.findMany();
     res.json(projects);
   }
 );
 
 export const getSelectedProject = asyncHandler(
-  async (req: Request, res: Response) => {
-    const data = z.number().safeParse(Number(req.params.id));
+  async (req: reqObj, res: Response) => {
+    console.log(req.headers.uid);
+    const data = z.number().gt(0).safeParse(Number(req.params.id));
     if (data.error) {
       res.status(400);
       return;

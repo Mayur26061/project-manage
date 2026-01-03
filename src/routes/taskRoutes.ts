@@ -1,4 +1,4 @@
-import { getProjectTasks, getSelectedTask, getTasks } from '@/controllers/taskControllers.js';
+import { getProjectTasks, getSelectedTask, getTasks } from '../controllers/taskControllers.js';
 import express from 'express';
 
 const router = express.Router();

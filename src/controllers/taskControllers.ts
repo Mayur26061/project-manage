@@ -1,7 +1,7 @@
 import type { Response, Request } from "express";
-import asyncHandler from "express-async-handler";
 import z from "zod";
 import { prisma } from "../lib/prisma.js";
+import { asyncHandler } from "../utils.js";
 
 export const getTasks = asyncHandler(
   async (_req: Request, res: Response) => {
