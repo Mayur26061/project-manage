@@ -6,7 +6,7 @@ import { asyncHandler } from "../utils.js";
 import { prisma } from "../lib/prisma.js";
 
 const signCheck = z.object({
-  email: z.string().email().min(1),
+  email: z.email().min(1),
   password: z.string().min(6),
 });
 
@@ -19,7 +19,7 @@ const generateToken = (id: number, email: string) => {
   return jwt.sign({ id, email }, process.env.JWT_SECRET, {
     expiresIn: "2d",
   });
-}
+};
 
 export const signIn = asyncHandler(async (req: Request, res: Response) => {
   const result = signCheck.parse(req.body);
@@ -42,7 +42,7 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
     `token=${token};Max-Age=172800;Path=/api;HttpOnly;SameSite=None;`
   );
   const { id, first_name, last_name, active } = user;
-  res.status(201).json({ user: { id, first_name, last_name, email, active } });
+  res.status(200).json({ user: { id, first_name, last_name, email, active } });
 });
 
 export const signUp = asyncHandler(async (req: Request, res: Response) => {

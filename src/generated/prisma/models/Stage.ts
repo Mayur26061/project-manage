@@ -285,7 +285,7 @@ export type StageScalarWhereWithAggregatesInput = {
 
 export type StageCreateInput = {
   name: string
-  sequence: number
+  sequence?: number
   created_at?: Date | string
   updated_at?: Date | string
   active?: boolean
@@ -296,7 +296,7 @@ export type StageCreateInput = {
 export type StageUncheckedCreateInput = {
   id?: number
   name: string
-  sequence: number
+  sequence?: number
   created_at?: Date | string
   updated_at?: Date | string
   active?: boolean
@@ -328,7 +328,7 @@ export type StageUncheckedUpdateInput = {
 export type StageCreateManyInput = {
   id?: number
   name: string
-  sequence: number
+  sequence?: number
   created_at?: Date | string
   updated_at?: Date | string
   active?: boolean
@@ -430,7 +430,7 @@ export type StageUpdateOneWithoutTasksNestedInput = {
 
 export type StageCreateWithoutProjectStagesInput = {
   name: string
-  sequence: number
+  sequence?: number
   created_at?: Date | string
   updated_at?: Date | string
   active?: boolean
@@ -440,7 +440,7 @@ export type StageCreateWithoutProjectStagesInput = {
 export type StageUncheckedCreateWithoutProjectStagesInput = {
   id?: number
   name: string
-  sequence: number
+  sequence?: number
   created_at?: Date | string
   updated_at?: Date | string
   active?: boolean
@@ -484,7 +484,7 @@ export type StageUncheckedUpdateWithoutProjectStagesInput = {
 
 export type StageCreateWithoutTasksInput = {
   name: string
-  sequence: number
+  sequence?: number
   created_at?: Date | string
   updated_at?: Date | string
   active?: boolean
@@ -494,7 +494,7 @@ export type StageCreateWithoutTasksInput = {
 export type StageUncheckedCreateWithoutTasksInput = {
   id?: number
   name: string
-  sequence: number
+  sequence?: number
   created_at?: Date | string
   updated_at?: Date | string
   active?: boolean

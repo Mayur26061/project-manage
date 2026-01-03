@@ -25,7 +25,7 @@ model User {
 model Stage {
   id            Int            @id @default(autoincrement())
   name          String
-  sequence      Int
+  sequence      Int            @default(1)
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
   active        Boolean        @default(true)
@@ -91,8 +91,8 @@ model Task {
   status          TaskStatus       @default(IN_PROGRESS)
   taskAssignments TaskAssignment[]
 
-  @@map("tasks")
   @@index([project_id])
+  @@map("tasks")
 }
 
 enum TaskStatus {

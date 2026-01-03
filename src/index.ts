@@ -2,6 +2,7 @@ import express from "express";
 import projectRoutes from "./routes/projectRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import stageRoutes from "./routes/stageRoutes.js";
 import cors from "cors";
 import { authenticateToken } from "./middleware/index.js";
 
@@ -17,6 +18,7 @@ app.use(cors(corsConfig));
 app.use(express.json());
 app.use("/api/project", authenticateToken, projectRoutes);
 app.use("/api/task", authenticateToken, taskRoutes);
+app.use("/api/stage", authenticateToken, stageRoutes);
 app.use("/api/user", userRoutes);
 
 app.listen(PORT, () => {
