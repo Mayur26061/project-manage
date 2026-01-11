@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import type { Response, Request } from "express";
 import jwt from "jsonwebtoken";
 import z from "zod";
-import { asyncHandler } from "../utils.js";
+import { asyncHandler, type reqObj } from "../utils.js";
 import { prisma } from "../lib/prisma.js";
 
 const signCheck = z.object({
@@ -39,7 +39,7 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
   const token = generateToken(user.id, user.email);
   res.setHeader(
     "set-cookie",
-    `token=${token};Max-Age=172800;Path=/api;HttpOnly;SameSite=None;`
+    `token=${token};Max-Age=172800;Path=/api;HttpOnly;SameSite=Lax;`
   );
   const { id, first_name, last_name, active } = user;
   res.status(200).json({ user: { id, first_name, last_name, email, active } });
@@ -71,4 +71,19 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
     `token=${token};Max-Age=172800;Path=/api;HttpOnly;SameSite=None;`
   );
   res.status(201).json({ user });
+});
+
+export const getMe = asyncHandler(async (req: reqObj, res: Response) => {
+  const userId = req.headers.uid as unknown as number;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      first_name: true,
+      last_name: true,
+      email: true,
+      active: true,
+    },
+  });
+  res.status(200).json({ user });
 });

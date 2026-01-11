@@ -20,7 +20,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
 const Sidebar = () => {
   const sidebarClasses = `flex flex-col fixed justify-between shadow-xl
     transition-all duration-300 h-full z-40 dark:bg-black overflow-y-auto
-    bg-white w-64`;
+    bg-white w-64 max-md:hidden`;
 
   return (
     <div className={`${sidebarClasses}`}>

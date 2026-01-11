@@ -1,0 +1,42 @@
+import { Outlet, createFileRoute, useParams } from '@tanstack/react-router'
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+export const Route = createFileRoute('/_pathlessLayout/projects/$projectId/tasks/')({
+  component: TasksComponent,
+})
+
+interface Result {
+    stage: {
+        name: string;
+        id: number;
+        sequence: number;
+        tasks: {
+            name: string;
+            project_id: number;
+            description: string | null;
+            stage_id: number | null;
+            id: number;
+            sequence: number;
+            priority: number;
+            created_at: Date;
+            updated_at: Date;
+            active: boolean;
+            deadline: Date | null;
+            status: "APPROVED" | "IN_PROGRESS" | "CHANGE_REQUESTED" | "DONE"
+        }[];
+    };
+}
+function TasksComponent() {
+     const params = useParams({ from: '/_pathlessLayout/projects/$projectId/tasks/' })
+   const [data, setData] = useState<Result[]>([])
+  useEffect(() => {
+    axios.get(`/api/task/tasks/${params.projectId}`).then((response) => {
+      setData(response.data.result)
+    })
+  }, [])
+    return <div>
+        {JSON.stringify(data)}
+
+      <Outlet />
+    </div>
+}

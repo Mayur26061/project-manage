@@ -32,7 +32,7 @@ export const getProjectTasks = asyncHandler(
     const projectId = data.data;
     const result = await prisma.projectStage.findMany({
       where: { project_id: projectId },
-      include: {
+      select: {
         stage: {
           select: { id: true, name: true, sequence: true, tasks: true },
         },
