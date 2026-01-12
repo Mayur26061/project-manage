@@ -12,9 +12,9 @@ const taskCreateCheck = z.object({
   // sequence: z.number().optional(),
   // priority: z.number().optional(),
   // deadline: z.date().optional(),
-  // status: z
-  //   .enum(["APPROVED", "IN_PROGRESS", "CHANGE_REQUESTED", "DONE"])
-  //   .optional(),
+  status: z
+    .enum(["APPROVED", "IN_PROGRESS", "CHANGE_REQUESTED", "DONE"])
+    .optional(),
 });
 
 export const getTasks = asyncHandler(async (_req: Request, res: Response) => {
@@ -76,6 +76,8 @@ export const createTask = asyncHandler(async (req: Request, res: Response) => {
     if (projectStageId) {
       data.stage = { connect: { id: projectStageId.stage_id } };
     }
+  } else {
+    data.stage = { connect: { id: result.stage_id } };
   }
   const task = await prisma.task.create({
     data: data,

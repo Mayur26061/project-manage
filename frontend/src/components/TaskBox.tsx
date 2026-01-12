@@ -1,24 +1,30 @@
-import React from 'react'
+import React from "react";
 
 type Props = {
+  task: {
+    name: string;
+    project_id: number;
+    description: string | null;
+    stage_id: number | null;
     id: number;
     sequence: number;
     priority: number;
-    name: string;
-    description: null;
-    created_at: string;
-    updated_at: string;
+    created_at: Date;
+    updated_at: Date;
     active: boolean;
-    stage_id: number;
-    project_id: number;
-    deadline: null;
-    status: string;
-}
+    deadline: Date | null;
+    status: "APPROVED" | "IN_PROGRESS" | "CHANGE_REQUESTED" | "DONE";
+  };
+};
 
-const TaskBox = (props: Props) => {
+const TaskBox = ({ task }: Props) => {
   return (
-    <div>{props.name}</div>
-  )
-}
+    <div className="border border-gray-300 rounded-lg p-2 shadow-sm bg-white" draggable={true}>
+      <h3 className="font-bold">{task.name}</h3>
+      <p className="text-sm text-gray-600">{task.description}</p>
+      <p className="text-xs text-gray-500">Status: {task.status}</p>
+    </div>
+  );
+};
 
-export default TaskBox
+export default TaskBox;
