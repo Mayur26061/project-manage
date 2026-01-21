@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 
 type Props = {
@@ -18,8 +19,14 @@ type Props = {
 };
 
 const TaskBox = ({ task }: Props) => {
+  const navigate = useNavigate();
+  const onClick = () => {
+    // Handle click event, e.g., navigate to task details or open a modal
+    console.log(`Task ${task.id} clicked`);
+    navigate({ to: '/tasks/$taskId', params: { taskId: task.id.toString() } });
+  }
   return (
-    <div className="border border-gray-300 rounded-lg p-2 shadow-sm bg-white" draggable={true}>
+    <div className="border border-gray-300 rounded-lg p-2 shadow-sm bg-white" onClick={onClick}>
       <h3 className="font-bold">{task.name}</h3>
       <p className="text-sm text-gray-600">{task.description}</p>
       <p className="text-xs text-gray-500">Status: {task.status}</p>
