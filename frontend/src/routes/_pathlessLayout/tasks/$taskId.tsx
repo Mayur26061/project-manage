@@ -11,6 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import Priority from "@/components/Priority";
+import RecordSelector from "@/components/RecordSelector";
 import { format } from "date-fns";
 import { ChevronDownIcon, Dot } from "lucide-react";
 import { Outlet, createFileRoute, useParams } from "@tanstack/react-router";
@@ -75,6 +76,7 @@ function TaskComponent() {
         return { ...state, priority: action.payload };
       }
       case "SET_INITIAL": {
+        console.log("Initial action:", action.payload);
         return { ...state, ...action.payload };
       }
       default:
@@ -127,7 +129,7 @@ function TaskComponent() {
               <Button
                 variant={"outline"}
                 data-empty={!formData.deadline}
-                className="data-[empty=true]:text-muted-foreground w-full justify-between text-left font-normal"
+                className="data-[empty=true]:text-muted-foreground w-full justify-between text-left font-normal overflow-hidden"
               >
                 {formData.status}
                 <ChevronDownIcon data-icon="inline-end" />
@@ -157,11 +159,7 @@ function TaskComponent() {
       <div className="flex gap-3">
         <div className="w-1/2">
           <Label>Project</Label>
-          <Input
-            className="my-2"
-            type="text"
-            defaultValue={formData.project_id}
-          />
+          <RecordSelector project_id={formData.project_id} />
         </div>
         <div className="w-1/2">
           <Label>DeadLine</Label>
