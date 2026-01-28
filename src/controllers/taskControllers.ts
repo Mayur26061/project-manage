@@ -56,6 +56,9 @@ export const getSelectedTask = asyncHandler(
     const taskId = data.data;
     const task = await prisma.task.findUnique({
       where: { id: taskId },
+      include: { project: {
+        select: { id: true, name: true }
+      }, stage: { select: { id: true, name: true } } },
     });
     res.json({ task });
   }
