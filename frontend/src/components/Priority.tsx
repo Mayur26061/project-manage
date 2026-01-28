@@ -20,7 +20,6 @@ const Priority = ({ priority, onSelect }: Props) => {
     <div className="flex mt-3" aria-label="Priority">
       {Array.from({ length: 3 }).map((_, i) => (
         <StarIcon
-          tabIndex={0}
           onKeyDown={(ev) => {
             if (ev.key !== "Enter") {
               return

@@ -6,26 +6,29 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
+import { LoaderCircle } from "lucide-react";
 type Props = {
-  project_id: number;
+  project: { id: number; name: string };
+  setProject: (project: { id: number; name: string }) => void;
 };
 
 const RecordSelector = (props: Props) => {
   const [open, setOpen] = React.useState(false);
-  const [projectId, setProjectId] = React.useState(props.project_id);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [projectName, setProjectName] = React.useState("");
   const [projects, setProjects] = React.useState<
-    Array<{ id: number; name: string }>
-  >([]);
+    { isLoading: boolean; projects: Array<{ id: number; name: string }> }
+  >({ isLoading: true, projects: [] });
 
   const fetchData = async (title: string | undefined = "") => {
     axios
       .post("/api/project/limited", {
         offset: 0,
-        title:title || '',
+        title: title || "",
       })
       .then((response) => {
         console.log("Fetched projects:", response.data);
-        setProjects(response.data);
+        setProjects({ isLoading: false, projects: response.data });
       })
       .catch((error) => {
         console.error("Error fetching projects:", error);
@@ -33,42 +36,68 @@ const RecordSelector = (props: Props) => {
   };
 
   useEffect(() => {
-    // Fetch projects or any other data if needed
+    // Fetch projects
     if (open) {
       const debounceFetch = setTimeout(() => {
-       fetchData("");
-        console.log("Popover opened");
-        console.log("Fetching data for RecordSelector...");
+        setProjects({ isLoading: false, projects: [] });
+        fetchData(projectName);
       }, 300); // Debounce to avoid excessive calls
       return () => clearTimeout(debounceFetch);
     }
-  }, [open]);
+  }, [open, projectName]);
 
-  const onSelectProject = (projectId: number) => {
+  const onSelectProject = (projectId: number, projectName: string) => {
     console.log("Selected project ID:", projectId);
-    setProjectId(projectId);
+    props.setProject({ id: projectId, name: projectName });
+    inputRef.current!.value = projectName;
     setOpen(false);
   };
 
   return (
-    <Popover onOpenChange={setOpen} open={open}>
-      <PopoverTrigger asChild className="mt-3">
-        <Input className="my-2" type="text" value={projectId} onChange={(ev) => {
-            fetchData(ev.target.value.trim());
-        }}/>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="center">
-        {projects.map((project) => (
-          <div
-            onClick={() => onSelectProject(project.id)}
-            key={project.id}
-            className="p-2 hover:bg-gray-100 cursor-pointer"
-          >
-            {project.name}
-          </div>
-        ))}
-      </PopoverContent>
-    </Popover>
+    <>
+      <Input
+        onClick={(ev) => {
+          ev.preventDefault();
+          setOpen(true);
+          ev.currentTarget.focus();
+        }}
+        className="mt-2"
+        type="text"
+        ref={inputRef}
+        defaultValue={props.project.name}
+        onChange={(ev) => {
+          setProjectName(ev.target.value);
+        }}
+      />
+      <Popover onOpenChange={setOpen} open={open}>
+        <PopoverTrigger asChild>
+          <div />
+        </PopoverTrigger>
+        <PopoverContent
+          onOpenAutoFocus={() => {
+            inputRef.current?.focus();
+          }}
+          className="min-w-5 max-w-64 p-1"
+          align="center"
+        >
+          {projects.projects.map((project) => (
+            <div
+              onClick={() => onSelectProject(project.id, project.name)}
+              key={project.id}
+              className="p-2 hover:bg-gray-100 cursor-pointer"
+            >
+              {project.name}
+            </div>
+          ))}
+          {projects.isLoading ? (
+            <LoaderCircle className="mx-auto my-2" />
+            // <div className="p-2 text-gray-500">No projects found</div>
+          ): projects.projects.length === 0 ? (
+            <div className="p-2 text-gray-500">No projects found</div>
+          ) : null}
+        </PopoverContent>
+      </Popover>
+    </>
   );
 };
 export default RecordSelector;

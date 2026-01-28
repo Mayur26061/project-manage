@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,9 +33,11 @@ interface Task {
   description: string | null;
   deadline: Date | null;
   status: "APPROVED" | "IN_PROGRESS" | "CHANGE_REQUESTED" | "DONE";
+  project: { id: number; name: string };
+  stage: { id: number; name: string };
 }
 const STATUS = ["APPROVED", "IN_PROGRESS", "CHANGE_REQUESTED", "DONE"] as const;
-const statusColors: Record<typeof STATUS[number], string> = {
+const statusColors: Record<(typeof STATUS)[number], string> = {
   APPROVED: "text-green-400",
   IN_PROGRESS: "text-blue-400",
   CHANGE_REQUESTED: "text-orange-500",
@@ -48,13 +50,15 @@ type actions =
     }
   | { type: "SET_DESCRIPTION"; payload: Task["description"] }
   | { type: "SET_STATUS"; payload: Task["status"] }
-  | { type: "SET_PROJECT_ID"; payload: Task["project_id"] }
+  | { type: "SET_PROJECT_ID"; payload: Task["project"] }
   | { type: "SET_DEADLINE"; payload: Task["deadline"] }
   | { type: "SET_PRIORITY"; payload: Task["priority"] }
   | { type: "SET_INITIAL"; payload: Task };
 
 function TaskComponent() {
   const params = useParams({ from: "/_pathlessLayout/tasks/$taskId" });
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [stateOpen, setStateOpen] = useState(false);
   const formReducerFunction = (state: Task, action: actions) => {
     switch (action.type) {
       case "SET_NAME": {
@@ -67,7 +71,11 @@ function TaskComponent() {
         return { ...state, status: action.payload };
       }
       case "SET_PROJECT_ID": {
-        return { ...state, project_id: action.payload };
+        return {
+          ...state,
+          project: action.payload,
+          project_id: action.payload.id,
+        };
       }
       case "SET_DEADLINE": {
         return { ...state, deadline: action.payload };
@@ -99,6 +107,8 @@ function TaskComponent() {
       created_at: new Date(),
       updated_at: new Date(),
       active: true,
+      project: { id: 0, name: "" },
+      stage: { id: 0, name: "" },
     },
   );
 
@@ -107,7 +117,9 @@ function TaskComponent() {
       dispatch({ type: "SET_INITIAL", payload: response.data.task });
     });
   }, [params.taskId]);
-
+  if (formData.id === 0) {
+    return <div className="p-5">Loading...</div>;
+  }
   return (
     <div className="p-5 w-full flex flex-col gap-2">
       <div className="flex items-center justify-between gap-5">
@@ -124,7 +136,7 @@ function TaskComponent() {
           />
         </div>
         <div className="w-1/6">
-          <Popover>
+          <Popover open={stateOpen} onOpenChange={setStateOpen}>
             <PopoverTrigger asChild className="mt-3">
               <Button
                 variant={"outline"}
@@ -136,22 +148,22 @@ function TaskComponent() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
-              {STATUS.map(
-                (status, _key) => (
-                  <div
-                    key={_key}
-                    className="p-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                    onClick={() => {
-                      dispatch({
-                        type: "SET_STATUS",
-                        payload: status as Task["status"],
-                      });
-                    }}
-                  >
-                    <Dot strokeWidth={10} className={statusColors[status]} /> {status}
-                  </div>
-                ),
-              )}
+              {STATUS.map((status, _key) => (
+                <div
+                  key={_key}
+                  className="p-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                  onClick={() => {
+                    dispatch({
+                      type: "SET_STATUS",
+                      payload: status as Task["status"],
+                    });
+                    setStateOpen(false);
+                  }}
+                >
+                  <Dot strokeWidth={10} className={statusColors[status]} />{" "}
+                  {status}
+                </div>
+              ))}
             </PopoverContent>
           </Popover>
         </div>
@@ -159,11 +171,16 @@ function TaskComponent() {
       <div className="flex gap-3">
         <div className="w-1/2">
           <Label>Project</Label>
-          <RecordSelector project_id={formData.project_id} />
+          <RecordSelector
+            project={formData.project}
+            setProject={(project) =>
+              dispatch({ type: "SET_PROJECT_ID", payload: project })
+            }
+          />
         </div>
         <div className="w-1/2">
           <Label>DeadLine</Label>
-          <Popover>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild className="my-2 ">
               <Button
                 variant={"outline"}
@@ -186,6 +203,7 @@ function TaskComponent() {
                 }
                 onSelect={(ev) => {
                   dispatch({ type: "SET_DEADLINE", payload: ev || null });
+                  setCalendarOpen(false);
                 }}
                 defaultMonth={
                   formData.deadline ? new Date(formData.deadline) : new Date()
