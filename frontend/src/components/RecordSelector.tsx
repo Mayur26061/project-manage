@@ -45,6 +45,12 @@ const RecordSelector = (props: Props) => {
       return () => clearTimeout(debounceFetch);
     }
   }, [open, projectName]);
+  
+  useEffect(() => {
+    // Update input value when props.project.name changes
+    inputRef.current!.value = props.project.name;
+  }, [props.project.name]);
+  
 
   const onSelectProject = (projectId: number, projectName: string) => {
     console.log("Selected project ID:", projectId);

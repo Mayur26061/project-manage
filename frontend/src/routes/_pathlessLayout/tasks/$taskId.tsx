@@ -20,6 +20,14 @@ export const Route = createFileRoute("/_pathlessLayout/tasks/$taskId")({
   component: TaskComponent,
 });
 
+interface UpdateTaskPayload {
+  name: string;
+  description: string | null;
+  status: "APPROVED" | "IN_PROGRESS" | "CHANGE_REQUESTED" | "DONE";
+  project_id: number;
+  deadline: Date | null;
+  priority: number;
+}
 interface Task {
   id: number;
   project_id: number;
@@ -36,6 +44,7 @@ interface Task {
   project: { id: number; name: string };
   stage: { id: number; name: string };
 }
+
 const STATUS = ["APPROVED", "IN_PROGRESS", "CHANGE_REQUESTED", "DONE"] as const;
 const statusColors: Record<(typeof STATUS)[number], string> = {
   APPROVED: "text-green-400",
@@ -59,6 +68,8 @@ function TaskComponent() {
   const params = useParams({ from: "/_pathlessLayout/tasks/$taskId" });
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [stateOpen, setStateOpen] = useState(false);
+  const [initData, setInitData] = useState<Task | null>(null);
+
   const formReducerFunction = (state: Task, action: actions) => {
     switch (action.type) {
       case "SET_NAME": {
@@ -84,7 +95,6 @@ function TaskComponent() {
         return { ...state, priority: action.payload };
       }
       case "SET_INITIAL": {
-        console.log("Initial action:", action.payload);
         return { ...state, ...action.payload };
       }
       default:
@@ -115,11 +125,58 @@ function TaskComponent() {
   useEffect(() => {
     axios.get(`/api/task/${params.taskId}`).then((response) => {
       dispatch({ type: "SET_INITIAL", payload: response.data.task });
+      setInitData(response.data.task);
     });
   }, [params.taskId]);
+
+  const onDiscardChanges = () => {
+    if (initData) {
+      dispatch({ type: "SET_INITIAL", payload: initData });
+    }
+  };
+
+  const onSaveChanges = async () => {
+    // Implement save logic here
+    const keyChecks: (keyof UpdateTaskPayload)[] = [
+      "name",
+      "description",
+      "status",
+      "project_id",
+      "deadline",
+      "priority",
+    ];
+
+    // Partial update data for optional fields
+    const updatedData: Partial<UpdateTaskPayload> = {};
+    for (const key of keyChecks) {
+      const value = formData[key];
+      if (
+        formData[key] !== initData?.[key] &&
+        value !== null &&
+        value !== undefined
+      ) {
+        (updatedData as Partial<Record<typeof key, typeof value>>)[key] = value;
+      }
+    }
+    if (Object.keys(updatedData).length === 0) {
+      return;
+    }
+    try {
+      const response = await axios.put(
+        `/api/task/update/${params.taskId}`,
+        updatedData,
+      );
+      dispatch({ type: "SET_INITIAL", payload: response.data.task });
+      setInitData(response.data.task);
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
+  };
+
   if (formData.id === 0) {
     return <div className="p-5">Loading...</div>;
   }
+
   return (
     <div className="p-5 w-full flex flex-col gap-2">
       <div className="flex items-center justify-between gap-5">
@@ -130,7 +187,6 @@ function TaskComponent() {
             type="text"
             value={formData.name}
             onChange={(ev) => {
-              console.log(ev.target.value);
               dispatch({ type: "SET_NAME", payload: ev.target.value });
             }}
           />
@@ -238,6 +294,12 @@ function TaskComponent() {
           value={formData.description || ""}
           placeholder="Enter Description here"
         />
+      </div>
+      <div className="flex gap-2">
+        <Button onClick={onSaveChanges}>Save</Button>
+        <Button variant={"outline"} onClick={onDiscardChanges}>
+          Cancel
+        </Button>
       </div>
       <Outlet />
     </div>

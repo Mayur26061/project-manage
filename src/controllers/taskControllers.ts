@@ -17,6 +17,18 @@ const taskCreateCheck = z.object({
     .optional(),
 });
 
+const taskUpdateCheck = z.object({
+  name: z.string().min(1).optional(),
+  description: z.string().min(1).optional(),
+  status: z
+    .enum(["APPROVED", "IN_PROGRESS", "CHANGE_REQUESTED", "DONE"])
+    .optional(),
+  project_id: z.number().gt(0).optional(),
+  deadline: z.string().optional().nullable(),
+  priority: z.number().optional(),
+});
+
+
 export const getTasks = asyncHandler(async (_req: Request, res: Response) => {
   const tasks = await prisma.task.findMany();
   res.json(tasks);
@@ -56,9 +68,11 @@ export const getSelectedTask = asyncHandler(
     const taskId = data.data;
     const task = await prisma.task.findUnique({
       where: { id: taskId },
-      include: { project: {
-        select: { id: true, name: true }
-      }, stage: { select: { id: true, name: true } } },
+      include: {
+        project: {
+          select: { id: true, name: true }
+        }, stage: { select: { id: true, name: true } }
+      },
     });
     res.json({ task });
   }
@@ -87,4 +101,38 @@ export const createTask = asyncHandler(async (req: Request, res: Response) => {
   });
   res.status(201).json({ task });
   return;
+});
+
+export const updateTask = asyncHandler(async (req: Request, res: Response) => {
+  const result = taskUpdateCheck.parse(req.body);
+  const taskId = Number(req.params.id);
+  const data: Prisma.TaskUpdateInput = {};
+  if (result.name !== undefined) {
+    data.name = result.name;
+  }
+  if (result.description !== undefined) {
+    data.description = result.description;
+  }
+  if (result.status !== undefined) {
+    data.status = result.status;
+  }
+  if (result.project_id !== undefined) {
+    data.project = { connect: { id: result.project_id } };
+  }
+  if (result.deadline !== undefined) {
+    data.deadline = result.deadline;
+  }
+  if (result.priority !== undefined) {
+    data.priority = result.priority;
+  }
+  const task = await prisma.task.update({
+    where: { id: taskId },
+    data: data,
+    include: {
+      project: {
+        select: { id: true, name: true }
+      }, stage: { select: { id: true, name: true } }
+    },
+  });
+  res.json({ task });
 });
