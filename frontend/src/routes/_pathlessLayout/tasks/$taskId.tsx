@@ -166,10 +166,14 @@ function TaskComponent() {
         `/api/task/update/${params.taskId}`,
         updatedData,
       );
+      if (response.status !== 200) {
+        throw new Error("Failed to update task");
+      }
       dispatch({ type: "SET_INITIAL", payload: response.data.task });
       setInitData(response.data.task);
     } catch (error) {
-      console.error("Error updating task:", error);
+      dispatch({ type: "SET_INITIAL", payload: initData! });
+      console.error("Error updating task: ", error);
     }
   };
 
