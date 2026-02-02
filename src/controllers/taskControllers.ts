@@ -80,7 +80,6 @@ export const getSelectedTask = asyncHandler(
 
 export const createTask = asyncHandler(async (req: Request, res: Response) => {
   const result = taskCreateCheck.parse(req.body);
-  console.log(result);
   const data: Prisma.TaskCreateInput = {
     name: result.name,
     project: { connect: { id: result.project_id } },

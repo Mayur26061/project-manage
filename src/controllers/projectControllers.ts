@@ -41,7 +41,6 @@ export const getLimitedProjects = asyncHandler(
 
 export const getSelectedProject = asyncHandler(
   async (req: reqObj, res: Response) => {
-    console.log(req.headers.uid);
     const data = z.number().gt(0).safeParse(Number(req.params.id));
     if (data.error) {
       res.status(400);

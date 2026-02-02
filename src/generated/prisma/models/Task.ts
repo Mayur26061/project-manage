@@ -648,20 +648,8 @@ export type TaskUpdateOneRequiredWithoutTaskAssignmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TaskUpdateToOneWithWhereWithoutTaskAssignmentsInput, Prisma.TaskUpdateWithoutTaskAssignmentsInput>, Prisma.TaskUncheckedUpdateWithoutTaskAssignmentsInput>
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type EnumTaskStatusFieldUpdateOperationsInput = {
   set?: $Enums.TaskStatus
-}
-
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
 }
 
 export type TaskCreateWithoutStageInput = {
