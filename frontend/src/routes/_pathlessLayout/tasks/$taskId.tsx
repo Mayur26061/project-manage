@@ -232,10 +232,11 @@ function TaskComponent() {
         <div className="w-1/2">
           <Label>Project</Label>
           <RecordSelector
-            project={formData.project}
-            setProject={(project) =>
+            data={formData.project}
+            setData={(project) =>
               dispatch({ type: "SET_PROJECT_ID", payload: project })
             }
+            model="project"
           />
         </div>
         <div className="w-1/2">

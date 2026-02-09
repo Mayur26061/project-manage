@@ -8,54 +8,57 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { LoaderCircle } from "lucide-react";
 type Props = {
-  project: { id: number; name: string };
-  setProject: (project: { id: number; name: string }) => void;
+  data: { id: number; name: string } | null;
+  setData: (data: { id: number; name: string }) => void;
+  model: "project" | "task" | "user";
 };
 
 const RecordSelector = (props: Props) => {
   const [open, setOpen] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [projectName, setProjectName] = React.useState("");
-  const [projects, setProjects] = React.useState<
-    { isLoading: boolean; projects: Array<{ id: number; name: string }> }
-  >({ isLoading: true, projects: [] });
+  const [dataName, setDataName] = React.useState("");
+  const [dropdownData, setDropdownData] = React.useState<{
+    isLoading: boolean;
+    records: Array<{ id: number; name: string }>;
+  }>({ isLoading: true, records: [] });
 
   const fetchData = async (title: string | undefined = "") => {
     axios
-      .post("/api/project/limited", {
+      .post(`/api/${props.model}/limited`, {
         offset: 0,
         title: title || "",
       })
       .then((response) => {
-        console.log("Fetched projects:", response.data);
-        setProjects({ isLoading: false, projects: response.data });
+        console.log("Fetched records:", response.data);
+        setDropdownData({ isLoading: false, records: response.data.data });
       })
       .catch((error) => {
-        console.error("Error fetching projects:", error);
+        console.error("Error fetching records:", error);
       });
   };
 
   useEffect(() => {
-    // Fetch projects
+    // Fetch records
     if (open) {
       const debounceFetch = setTimeout(() => {
-        setProjects({ isLoading: false, projects: [] });
-        fetchData(projectName);
+        setDropdownData({ isLoading: false, records: [] });
+        fetchData(dataName);
       }, 300); // Debounce to avoid excessive calls
       return () => clearTimeout(debounceFetch);
     }
-  }, [open, projectName]);
-  
-  useEffect(() => {
-    // Update input value when props.project.name changes
-    inputRef.current!.value = props.project.name;
-  }, [props.project.name]);
-  
+  }, [open, dataName]);
 
-  const onSelectProject = (projectId: number, projectName: string) => {
-    console.log("Selected project ID:", projectId);
-    props.setProject({ id: projectId, name: projectName });
-    inputRef.current!.value = projectName;
+  useEffect(() => {
+    // Update input value when props.data.name changes
+    if (inputRef.current) {
+      inputRef.current.value = props.data?.name || "";
+    }
+  }, [props.data?.name]);
+
+  const onSelectRecord = (recordId: number, dataName: string) => {
+    console.log("Selected record ID:", recordId);
+    props.setData({ id: recordId, name: dataName });
+    inputRef.current!.value = dataName;
     setOpen(false);
   };
 
@@ -70,9 +73,9 @@ const RecordSelector = (props: Props) => {
         className="mt-2"
         type="text"
         ref={inputRef}
-        defaultValue={props.project.name}
+        defaultValue={props.data?.name || ""}
         onChange={(ev) => {
-          setProjectName(ev.target.value);
+          setDataName(ev.target.value);
         }}
       />
       <Popover onOpenChange={setOpen} open={open}>
@@ -86,20 +89,20 @@ const RecordSelector = (props: Props) => {
           className="min-w-5 max-w-64 p-1"
           align="center"
         >
-          {projects.projects.map((project) => (
+          {dropdownData.records.map((rec) => (
             <div
-              onClick={() => onSelectProject(project.id, project.name)}
-              key={project.id}
+              onClick={() => onSelectRecord(rec.id, rec.name)}
+              key={rec.id}
               className="p-2 hover:bg-gray-100 cursor-pointer"
             >
-              {project.name}
+              {rec.name}
             </div>
           ))}
-          {projects.isLoading ? (
+          {dropdownData.isLoading ? (
             <LoaderCircle className="mx-auto my-2" />
-            // <div className="p-2 text-gray-500">No projects found</div>
-          ): projects.projects.length === 0 ? (
-            <div className="p-2 text-gray-500">No projects found</div>
+          ) : // <div className="p-2 text-gray-500">No records found</div>
+          dropdownData.records.length === 0 ? (
+            <div className="p-2 text-gray-500">No records found</div>
           ) : null}
         </PopoverContent>
       </Popover>
