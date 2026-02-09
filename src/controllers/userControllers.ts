@@ -2,8 +2,9 @@ import bcrypt from "bcryptjs";
 import type { Response, Request } from "express";
 import jwt from "jsonwebtoken";
 import z from "zod";
-import { asyncHandler, type reqObj } from "../utils.js";
+import { asyncHandler, type reqObj, limitFetchParams } from "../utils.js";
 import { prisma } from "../lib/prisma.js";
+import type { UserWhereInput } from "@/generated/prisma/models.js";
 
 const signCheck = z.object({
   email: z.email().min(1),
@@ -87,3 +88,26 @@ export const getMe = asyncHandler(async (req: reqObj, res: Response) => {
   });
   res.status(200).json({ user });
 });
+
+export const getLimitedUsers = asyncHandler(
+  async (req: reqObj, res: Response) => {
+    const data = limitFetchParams.parse(req.body);
+    const titleFilter: UserWhereInput = data.title
+      ? {
+        OR: [
+          { first_name: { contains: data.title, mode: "insensitive" } },
+          { last_name: { contains: data.title, mode: "insensitive" } },
+        ],
+        active: true,
+      }
+      : { active: true };
+    const users = await prisma.user.findMany({
+      where: titleFilter,
+      select: { id: true, name: true },
+      take: 8,
+      skip: data.offset,
+      orderBy: { first_name: "asc" },
+    });
+    res.json({ data: users });
+  }
+);

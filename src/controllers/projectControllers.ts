@@ -1,17 +1,12 @@
 import type { Response } from "express";
 import z from "zod";
 import { prisma } from "../lib/prisma.js";
-import { asyncHandler, type reqObj } from "../utils.js";
+import { asyncHandler, type reqObj, limitFetchParams } from "../utils.js";
 import type { ProjectWhereInput } from "@/generated/prisma/models.js";
 
 const projectCreateCheck = z.object({
   name: z.string().min(1),
   description: z.string().min(1).optional(),
-});
-
-const limitFetchParams = z.object({
-  offset: z.number().optional().default(0),
-  title: z.string().trim().optional(),
 });
 
 export const getProjects = asyncHandler(async (_req: reqObj, res: Response) => {
@@ -24,9 +19,9 @@ export const getLimitedProjects = asyncHandler(
     const data = limitFetchParams.parse(req.body);
     const titleFilter: ProjectWhereInput = data.title
       ? {
-          name: { contains: data.title, mode: "insensitive" },
-          active: true,
-        }
+        name: { contains: data.title, mode: "insensitive" },
+        active: true,
+      }
       : { active: true };
     const projects = await prisma.project.findMany({
       where: titleFilter,
@@ -35,7 +30,7 @@ export const getLimitedProjects = asyncHandler(
       skip: data.offset,
       orderBy: { name: "asc" },
     });
-    res.json(projects);
+    res.json({ data: projects });
   }
 );
 
@@ -49,7 +44,15 @@ export const getSelectedProject = asyncHandler(
     const projectId = data.data;
     const project = await prisma.project.findUnique({
       where: { id: projectId },
+      include: {
+        owner: { select: { id: true, name: true } },
+        customer: { select: { id: true, name: true } },
+      }
     });
+    if (!project) {
+      res.status(404).json({ message: "Project not found" });
+      return;
+    }
     res.json({ project });
   }
 );

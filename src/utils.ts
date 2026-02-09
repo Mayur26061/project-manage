@@ -3,11 +3,16 @@ import type { Request, Response } from "express";
 import { ZodError, z } from "zod";
 
 interface CustomHeaders {
-  uid?: number;
+    uid?: number;
 }
 export interface reqObj extends Request {
-  headers: CustomHeaders & Request["headers"];
+    headers: CustomHeaders & Request["headers"];
 }
+
+export const limitFetchParams = z.object({
+    offset: z.number().optional().default(0),
+    title: z.string().trim().optional(),
+});
 
 export const asyncHandler = <
     T extends (req: reqObj, res: Response) => Promise<void>,
