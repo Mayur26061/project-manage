@@ -28,6 +28,7 @@ interface UpdateTaskPayload {
   deadline: Date | null;
   priority: number;
 }
+
 interface Task {
   id: number;
   project_id: number;

@@ -3,10 +3,19 @@ import z from "zod";
 import { prisma } from "../lib/prisma.js";
 import { asyncHandler, type reqObj, limitFetchParams } from "../utils.js";
 import type { ProjectWhereInput } from "@/generated/prisma/models.js";
+import type { Prisma } from "@/generated/prisma/client.js";
 
 const projectCreateCheck = z.object({
   name: z.string().min(1),
   description: z.string().min(1).optional(),
+});
+
+const projectUpdateCheck = z.object({
+  name: z.string().min(1).optional(),
+  description: z.string().min(1).optional(),
+  customer_id: z.number().gt(0).optional().nullable(),
+  owner_id: z.number().gt(0).optional(),
+  date_end: z.string().optional().nullable(),
 });
 
 export const getProjects = asyncHandler(async (_req: reqObj, res: Response) => {
@@ -82,5 +91,32 @@ export const getProjectStages = asyncHandler(
       include: { stage: true },
     });
     res.json({ stages });
+  }
+);
+
+export const updateProject = asyncHandler(
+  async (req: reqObj, res: Response) => {
+    const projectId = Number(req.params.id);
+    const result = projectUpdateCheck.parse(req.body);
+    const data: Prisma.ProjectUpdateInput = {};
+    if (result.name) data.name = result.name;
+    if (result.description) data.description = result.description;
+    if (result.owner_id) data.owner = {connect: {id: result.owner_id}};
+    if (result.customer_id !== undefined) data.customer = result.customer_id ? {connect: { id: result.customer_id}} : {disconnect: true};
+    if (result.date_end !== undefined) data.date_end = result.date_end ? new Date(result.date_end) : null;
+    const existingProject = await prisma.project.findUnique({
+      where: { id: projectId },
+    });
+    if (!data || !existingProject) {
+      res.status(404).json({ message: "Project not found" });
+      return;
+    }
+    const updatedProject = await prisma.project.update({
+      where: { id: projectId },
+      data: {
+        ...data,
+      },
+    });
+    res.json({ project: updatedProject });
   }
 );

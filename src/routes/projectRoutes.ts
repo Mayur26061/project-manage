@@ -4,6 +4,7 @@ import {
     createProject,
     getProjectStages,
     getLimitedProjects,
+    updateProject,
 } from "../controllers/projectControllers.js";
 import express from "express";
 
@@ -14,5 +15,6 @@ router.get("/:id", getSelectedProject);
 router.get("/:id/stages", getProjectStages);
 router.post("/create", createProject);
 router.post("/limited", getLimitedProjects);
+router.put("/update/:id", updateProject);
 
 export default router;

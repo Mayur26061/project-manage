@@ -18,6 +18,14 @@ export const Route = createFileRoute("/_pathlessLayout/projects/$projectId/")({
   component: ProjectComponent,
 });
 
+interface UpdateProjectPayload {
+  name: string;
+  description: string | null;
+  date_end: Date | null;
+  customer_id: number;
+  owner_id: number;
+}
+
 interface Project {
   id: number;
   created_at: Date;
@@ -93,8 +101,44 @@ function ProjectComponent() {
       customer: { id: 0, name: "" },
     },
   );
- const onSaveChanges = () => {
-   
+
+ const onSaveChanges = async () => {
+      const keyChecks: (keyof UpdateProjectPayload)[] = [
+      "name",
+      "description",
+      "date_end",
+      "customer_id",
+      "owner_id",
+    ];
+
+    // Partial update data for optional fields
+    const updatedData: Partial<UpdateProjectPayload> = {};
+    for (const key of keyChecks) {
+      const value = formData[key];
+      if (
+        formData[key] !== project?.[key]
+      ) {
+        (updatedData as Partial<Record<typeof key, typeof value>>)[key] = value;
+      }
+    }
+    if (Object.keys(updatedData).length === 0) {
+      return;
+    }
+    console.log("Updated Data: ", updatedData);
+    try {
+      const response = await axios.put(
+        `/api/project/update/${params.projectId}`,
+        updatedData,
+      );
+      if (response.status !== 200) {
+        throw new Error("Failed to update project");
+      }
+      dispatch({ type: "SET_INITIAL", payload: response.data.project });
+      setProject(response.data.project);
+    } catch (error) {
+      dispatch({ type: "SET_INITIAL", payload: project! });
+      console.error("Error updating project: ", error);
+    }
  };
  
  const onDiscardChanges = () => {
