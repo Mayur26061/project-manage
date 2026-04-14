@@ -71,7 +71,11 @@ export const getSelectedTask = asyncHandler(
       include: {
         project: {
           select: { id: true, name: true }
-        }, stage: { select: { id: true, name: true } }
+        }, stage: { select: { id: true, name: true } },
+        taskAssignments: {
+          select:{ user: { select: { id: true, name: true } } }
+          // include: {user: { select: { id: true, name: true } } }
+        }
       },
     });
     res.json({ task });

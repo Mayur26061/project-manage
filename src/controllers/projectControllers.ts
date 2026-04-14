@@ -19,7 +19,7 @@ const projectUpdateCheck = z.object({
 });
 
 export const getProjects = asyncHandler(async (_req: reqObj, res: Response) => {
-  const projects = await prisma.project.findMany({ include: { owner: { select: { id: true, name: true } }, customer: { select: { id: true, name: true } } } });
+  const projects = await prisma.project.findMany({orderBy: { created_at: "asc" }, include: { owner: { select: { id: true, name: true } }, customer: { select: { id: true, name: true } } } });
   res.json(projects);
 });
 

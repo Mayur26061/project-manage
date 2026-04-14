@@ -15,6 +15,7 @@ import RecordSelector from "@/components/RecordSelector";
 import { format } from "date-fns";
 import { ChevronDownIcon, Dot } from "lucide-react";
 import { Outlet, createFileRoute, useParams } from "@tanstack/react-router";
+import RecordBadge from "@/components/RecordBadge";
 
 export const Route = createFileRoute("/_pathlessLayout/tasks/$taskId")({
   component: TaskComponent,
@@ -28,7 +29,9 @@ interface UpdateTaskPayload {
   deadline: Date | null;
   priority: number;
 }
-
+interface Assignee {
+  user: { id: number; name: string };
+}
 interface Task {
   id: number;
   project_id: number;
@@ -44,6 +47,7 @@ interface Task {
   status: "APPROVED" | "IN_PROGRESS" | "CHANGE_REQUESTED" | "DONE";
   project: { id: number; name: string };
   stage: { id: number; name: string };
+  taskAssignments: Assignee[];
 }
 
 const STATUS = ["APPROVED", "IN_PROGRESS", "CHANGE_REQUESTED", "DONE"] as const;
@@ -120,6 +124,7 @@ function TaskComponent() {
       active: true,
       project: { id: 0, name: "" },
       stage: { id: 0, name: "" },
+      taskAssignments: [],
     },
   );
 
@@ -278,7 +283,15 @@ function TaskComponent() {
       <div className="flex gap-3">
         <div className="w-1/2">
           <Label>Assigneess</Label>
-          <Input className="my-2" type="text" />
+          {formData.taskAssignments.length > 0 ? (
+            <div className="flex gap-1 my-2 flex-wrap">
+              {formData.taskAssignments.map((assignee, index) => (
+                <RecordBadge key={index} name={assignee.user.name} />
+              ))}
+            </div>
+          ) : (
+            <Input className="my-2" type="text" />
+          )}
         </div>
         <div className="w-1/2">
           <Label>Priority</Label>
