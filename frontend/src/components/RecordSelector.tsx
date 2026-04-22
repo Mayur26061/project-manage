@@ -11,6 +11,8 @@ type Props = {
   data: { id: number; name: string } | null;
   setData: (data: { id: number; name: string }) => void;
   model: "project" | "task" | "user";
+  inputClassName?: string;
+  isMany?: boolean;
 };
 
 const RecordSelector = (props: Props) => {
@@ -58,7 +60,9 @@ const RecordSelector = (props: Props) => {
   const onSelectRecord = (recordId: number, dataName: string) => {
     console.log("Selected record ID:", recordId);
     props.setData({ id: recordId, name: dataName });
-    inputRef.current!.value = dataName;
+    if (!props.isMany) {
+      inputRef.current!.value = dataName;
+    }
     setOpen(false);
   };
 
@@ -70,7 +74,9 @@ const RecordSelector = (props: Props) => {
           setOpen(true);
           ev.currentTarget.focus();
         }}
-        className="mt-2"
+        className={
+          props.inputClassName ? props.inputClassName + " mt-2" : "mt-2"
+        }
         type="text"
         ref={inputRef}
         defaultValue={props.data?.name || ""}

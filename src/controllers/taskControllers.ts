@@ -26,7 +26,10 @@ const taskUpdateCheck = z.object({
   project_id: z.number().gt(0).optional(),
   deadline: z.string().optional().nullable(),
   priority: z.number().optional(),
-});
+  assignees: z.array(z.object({ op: z.enum(["add", "remove"]), value: z.string() })).optional(),
+}).refine((data) => Object.values(data).some((value) => value !== undefined), {
+  message: "Empty Object",
+});;
 
 
 export const getTasks = asyncHandler(async (_req: Request, res: Response) => {
@@ -73,7 +76,7 @@ export const getSelectedTask = asyncHandler(
           select: { id: true, name: true }
         }, stage: { select: { id: true, name: true } },
         taskAssignments: {
-          select:{ user: { select: { id: true, name: true } } }
+          select: { user: { select: { id: true, name: true } } }
           // include: {user: { select: { id: true, name: true } } }
         }
       },
@@ -128,13 +131,24 @@ export const updateTask = asyncHandler(async (req: Request, res: Response) => {
   if (result.priority !== undefined) {
     data.priority = result.priority;
   }
+  if (result.assignees !== undefined && result.assignees.length > 0) {
+    data.taskAssignments = {
+      deleteMany: result.assignees.filter((cmd) => cmd.op === "remove").map((cmd) => ({ user_id: Number(cmd.value) })),
+      createMany: {
+        data: result.assignees.filter((cmd) => cmd.op === "add").map((cmd) => ({ user_id: Number(cmd.value) })),
+      },
+    };
+  }
   const task = await prisma.task.update({
     where: { id: taskId },
     data: data,
     include: {
       project: {
         select: { id: true, name: true }
-      }, stage: { select: { id: true, name: true } }
+      }, stage: { select: { id: true, name: true } },
+      taskAssignments: {
+        select: { user: { select: { id: true, name: true } } }
+      }
     },
   });
   res.json({ task });

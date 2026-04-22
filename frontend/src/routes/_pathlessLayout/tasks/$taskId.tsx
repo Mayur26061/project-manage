@@ -28,6 +28,7 @@ interface UpdateTaskPayload {
   project_id: number;
   deadline: Date | null;
   priority: number;
+  // assignees?: string; // JSON stringified array of commands
 }
 interface Assignee {
   user: { id: number; name: string };
@@ -67,7 +68,9 @@ type actions =
   | { type: "SET_PROJECT_ID"; payload: Task["project"] }
   | { type: "SET_DEADLINE"; payload: Task["deadline"] }
   | { type: "SET_PRIORITY"; payload: Task["priority"] }
-  | { type: "SET_INITIAL"; payload: Task };
+  | { type: "SET_INITIAL"; payload: Task }
+  | { type: "SET_ASSIGNEE"; payload: Assignee }
+  | { type: "REMOVE_ASSIGNEE"; payload: { user_id: number } };
 
 function TaskComponent() {
   const params = useParams({ from: "/_pathlessLayout/tasks/$taskId" });
@@ -101,6 +104,25 @@ function TaskComponent() {
       }
       case "SET_INITIAL": {
         return { ...state, ...action.payload };
+      }
+      case "SET_ASSIGNEE": {
+        for (const assignment of state.taskAssignments) {
+          if (assignment.user.id === action.payload.user.id) {
+            return state;
+          }
+        }
+        return {
+          ...state,
+          taskAssignments: [...state.taskAssignments, action.payload],
+        };
+      }
+      case "REMOVE_ASSIGNEE": {
+        return {
+          ...state,
+          taskAssignments: state.taskAssignments.filter(
+            (assignment) => assignment.user.id !== action.payload.user_id,
+          ),
+        };
       }
       default:
         return state;
@@ -164,14 +186,31 @@ function TaskComponent() {
         (updatedData as Partial<Record<typeof key, typeof value>>)[key] = value;
       }
     }
-    if (Object.keys(updatedData).length === 0) {
+    // debugger;
+    const initialAssigneeIds = new Set(
+      initData?.taskAssignments.map((u) => u.user.id) || [],
+    );
+    const updatedAssigneeIds = new Set(
+      formData.taskAssignments.map((u) => u.user.id),
+    );
+    const commands: Record<string, string>[] = [];
+    const overall = new Set([...initialAssigneeIds, ...updatedAssigneeIds]);
+    for (const id of overall) {
+      if (!initialAssigneeIds?.has(id)) {
+        commands.push({ op: "add", value: id.toString() });
+      } else if (!updatedAssigneeIds.has(id)) {
+        commands.push({ op: "remove", value: id.toString() });
+      }
+    }
+    console.log("Commands: ", commands);
+    if (Object.keys(updatedData).length === 0 && commands.length === 0) {
       return;
     }
     try {
-      const response = await axios.put(
-        `/api/task/update/${params.taskId}`,
-        updatedData,
-      );
+      const response = await axios.put(`/api/task/update/${params.taskId}`, {
+        ...updatedData,
+        assignees: commands,
+      });
       if (response.status !== 200) {
         throw new Error("Failed to update task");
       }
@@ -181,6 +220,10 @@ function TaskComponent() {
       dispatch({ type: "SET_INITIAL", payload: initData! });
       console.error("Error updating task: ", error);
     }
+  };
+
+  const OnSelectAssignee = (user: { id: number; name: string }) => {
+    dispatch({ type: "SET_ASSIGNEE", payload: { user } });
   };
 
   if (formData.id === 0) {
@@ -283,15 +326,27 @@ function TaskComponent() {
       <div className="flex gap-3">
         <div className="w-1/2">
           <Label>Assigneess</Label>
-          {formData.taskAssignments.length > 0 ? (
-            <div className="flex gap-1 my-2 flex-wrap">
-              {formData.taskAssignments.map((assignee, index) => (
-                <RecordBadge key={index} name={assignee.user.name} />
-              ))}
-            </div>
-          ) : (
-            <Input className="my-2" type="text" />
-          )}
+          <div className="flex gap-1 my-2 flex-wrap">
+            {formData.taskAssignments.map((assignee, index) => (
+              <RecordBadge
+                key={index}
+                name={assignee.user.name}
+                onRemove={() => {
+                  dispatch({
+                    type: "REMOVE_ASSIGNEE",
+                    payload: { user_id: assignee.user.id },
+                  });
+                }}
+              />
+            ))}
+            <RecordSelector
+              data={null}
+              isMany={true}
+              model="user"
+              inputClassName="w-auto border-0 outline-none border-b-2"
+              setData={OnSelectAssignee}
+            />
+          </div>
         </div>
         <div className="w-1/2">
           <Label>Priority</Label>
