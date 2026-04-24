@@ -8,7 +8,7 @@ export const Route = createFileRoute(
   component: TasksComponent,
 });
 
-interface Result {
+export interface Result {
   stage: {
     name: string;
     id: number;
@@ -42,7 +42,7 @@ function TasksComponent() {
   return (
     <div className="p-4 flex gap-4 overflow-x-auto h-full">
       {data.map((stage) => (
-        <Stage key={stage.stage.id} stage={stage.stage} />
+        <Stage key={stage.stage.id} stage={stage.stage} onTaskUpdate={setData} />
       ))}
       <Outlet />
     </div>
