@@ -1,6 +1,7 @@
 import { type Dispatch, type SetStateAction } from "react";
 import TaskBox from "./TaskBox";
 import type { Result } from "@/routes/_pathlessLayout/projects/$projectId/tasks/index";
+import axios from "axios";
 
 type Props = {
   stage: {
@@ -26,43 +27,53 @@ type Props = {
 };
 
 export const Stage = ({ stage, onTaskUpdate }: Props) => {
+  const onDropAsync = async (ev: React.DragEvent<HTMLDivElement>) => {
+    const id = ev.dataTransfer.getData("text");
+    if (stage.tasks.find((task) => task.id === Number(id))) return;
+     try {
+       const response = await axios.put(`/api/task/update/${id}`, {
+         stage_id: stage.id,
+       });
+       if (response.status !== 200) {
+         throw new Error("Failed to update task");
+       }
+     } catch (error) {
+       console.error("Error updating task: ", error);
+       return;
+     }
+    onTaskUpdate((prev) => {
+      const newData = prev.map((s) => {
+        if (s.stage.tasks.find((task) => task.id === Number(id))) {
+          return {
+            ...s,
+            stage: {
+              ...s.stage,
+              tasks: s.stage.tasks.filter((task) => task.id !== Number(id)),
+            },
+          };
+        } else if (s.stage.id === stage.id) {
+          const task = prev
+            .find((s) => s.stage.tasks.find((task) => task.id === Number(id)))
+            ?.stage.tasks.find((task) => task.id === Number(id));
+          if (!task) return s;
+          return {
+            ...s,
+            stage: {
+              ...s.stage,
+              tasks: [...s.stage.tasks, { ...task, stage_id: stage.id }],
+            },
+          };
+        } else {
+          return s;
+        }
+      });
+      return newData;
+    });
+  };
   return (
     <div
       className="p-4 w-56 h-full shrink-0 flex flex-col gap-4 select-none"
-      onDrop={(ev) => {
-        const id = ev.dataTransfer.getData("text");
-        if (stage.tasks.find((task) => task.id === Number(id))) return;
-        onTaskUpdate((prev) => {
-          const newData = prev.map((s) => {
-            if (s.stage.tasks.find((task) => task.id === Number(id))) {
-              return {
-                ...s,
-                stage: {
-                  ...s.stage,
-                  tasks: s.stage.tasks.filter((task) => task.id !== Number(id)),
-                },
-              };
-            } else if (s.stage.id === stage.id) {
-              const task = prev
-                .find((s) =>
-                  s.stage.tasks.find((task) => task.id === Number(id)),
-                )
-                ?.stage.tasks.find((task) => task.id === Number(id));
-              if (!task) return s;
-              return {
-                ...s,
-                stage: {
-                  ...s.stage,
-                  tasks: [...s.stage.tasks, { ...task, stage_id: stage.id }],
-                },
-              };
-            } else {
-              return s;
-            }
-          });
-          return newData;
-        });
-      }}
+      onDrop={onDropAsync}
       onDragOver={(ev) => {
         ev.preventDefault();
       }}

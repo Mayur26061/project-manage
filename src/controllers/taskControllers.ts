@@ -26,10 +26,11 @@ const taskUpdateCheck = z.object({
   project_id: z.number().gt(0).optional(),
   deadline: z.string().optional().nullable(),
   priority: z.number().optional(),
+  stage_id: z.number().gt(0).optional(),
   assignees: z.array(z.object({ op: z.enum(["add", "remove"]), value: z.string() })).optional(),
 }).refine((data) => Object.values(data).some((value) => value !== undefined), {
   message: "Empty Object",
-});;
+});
 
 
 export const getTasks = asyncHandler(async (_req: Request, res: Response) => {
@@ -124,6 +125,9 @@ export const updateTask = asyncHandler(async (req: Request, res: Response) => {
   }
   if (result.project_id !== undefined) {
     data.project = { connect: { id: result.project_id } };
+  }
+  if (result.stage_id !== undefined) {
+    data.stage = { connect: { id: result.stage_id } };
   }
   if (result.deadline !== undefined) {
     data.deadline = result.deadline;
