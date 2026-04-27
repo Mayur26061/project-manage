@@ -14,6 +14,7 @@ import { Route as PathlessLayoutRouteImport } from './routes/_pathlessLayout'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PathlessLayoutTestRouteImport } from './routes/_pathlessLayout/test'
 import { Route as PathlessLayoutTasksIndexRouteImport } from './routes/_pathlessLayout/tasks/index'
+import { Route as PathlessLayoutStagesIndexRouteImport } from './routes/_pathlessLayout/stages/index'
 import { Route as PathlessLayoutProjectsIndexRouteImport } from './routes/_pathlessLayout/projects/index'
 import { Route as PathlessLayoutTasksTaskIdRouteImport } from './routes/_pathlessLayout/tasks/$taskId'
 import { Route as PathlessLayoutProjectsProjectIdIndexRouteImport } from './routes/_pathlessLayout/projects/$projectId/index'
@@ -42,6 +43,12 @@ const PathlessLayoutTasksIndexRoute =
   PathlessLayoutTasksIndexRouteImport.update({
     id: '/tasks/',
     path: '/tasks/',
+    getParentRoute: () => PathlessLayoutRoute,
+  } as any)
+const PathlessLayoutStagesIndexRoute =
+  PathlessLayoutStagesIndexRouteImport.update({
+    id: '/stages/',
+    path: '/stages/',
     getParentRoute: () => PathlessLayoutRoute,
   } as any)
 const PathlessLayoutProjectsIndexRoute =
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/test': typeof PathlessLayoutTestRoute
   '/tasks/$taskId': typeof PathlessLayoutTasksTaskIdRoute
   '/projects': typeof PathlessLayoutProjectsIndexRoute
+  '/stages': typeof PathlessLayoutStagesIndexRoute
   '/tasks': typeof PathlessLayoutTasksIndexRoute
   '/projects/$projectId': typeof PathlessLayoutProjectsProjectIdIndexRoute
   '/projects/$projectId/tasks': typeof PathlessLayoutProjectsProjectIdTasksIndexRoute
@@ -85,6 +93,7 @@ export interface FileRoutesByTo {
   '/test': typeof PathlessLayoutTestRoute
   '/tasks/$taskId': typeof PathlessLayoutTasksTaskIdRoute
   '/projects': typeof PathlessLayoutProjectsIndexRoute
+  '/stages': typeof PathlessLayoutStagesIndexRoute
   '/tasks': typeof PathlessLayoutTasksIndexRoute
   '/projects/$projectId': typeof PathlessLayoutProjectsProjectIdIndexRoute
   '/projects/$projectId/tasks': typeof PathlessLayoutProjectsProjectIdTasksIndexRoute
@@ -97,6 +106,7 @@ export interface FileRoutesById {
   '/_pathlessLayout/test': typeof PathlessLayoutTestRoute
   '/_pathlessLayout/tasks/$taskId': typeof PathlessLayoutTasksTaskIdRoute
   '/_pathlessLayout/projects/': typeof PathlessLayoutProjectsIndexRoute
+  '/_pathlessLayout/stages/': typeof PathlessLayoutStagesIndexRoute
   '/_pathlessLayout/tasks/': typeof PathlessLayoutTasksIndexRoute
   '/_pathlessLayout/projects/$projectId/': typeof PathlessLayoutProjectsProjectIdIndexRoute
   '/_pathlessLayout/projects/$projectId/tasks/': typeof PathlessLayoutProjectsProjectIdTasksIndexRoute
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/test'
     | '/tasks/$taskId'
     | '/projects'
+    | '/stages'
     | '/tasks'
     | '/projects/$projectId'
     | '/projects/$projectId/tasks'
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/test'
     | '/tasks/$taskId'
     | '/projects'
+    | '/stages'
     | '/tasks'
     | '/projects/$projectId'
     | '/projects/$projectId/tasks'
@@ -130,6 +142,7 @@ export interface FileRouteTypes {
     | '/_pathlessLayout/test'
     | '/_pathlessLayout/tasks/$taskId'
     | '/_pathlessLayout/projects/'
+    | '/_pathlessLayout/stages/'
     | '/_pathlessLayout/tasks/'
     | '/_pathlessLayout/projects/$projectId/'
     | '/_pathlessLayout/projects/$projectId/tasks/'
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PathlessLayoutTasksIndexRouteImport
       parentRoute: typeof PathlessLayoutRoute
     }
+    '/_pathlessLayout/stages/': {
+      id: '/_pathlessLayout/stages/'
+      path: '/stages'
+      fullPath: '/stages'
+      preLoaderRoute: typeof PathlessLayoutStagesIndexRouteImport
+      parentRoute: typeof PathlessLayoutRoute
+    }
     '/_pathlessLayout/projects/': {
       id: '/_pathlessLayout/projects/'
       path: '/projects'
@@ -213,6 +233,7 @@ interface PathlessLayoutRouteChildren {
   PathlessLayoutTestRoute: typeof PathlessLayoutTestRoute
   PathlessLayoutTasksTaskIdRoute: typeof PathlessLayoutTasksTaskIdRoute
   PathlessLayoutProjectsIndexRoute: typeof PathlessLayoutProjectsIndexRoute
+  PathlessLayoutStagesIndexRoute: typeof PathlessLayoutStagesIndexRoute
   PathlessLayoutTasksIndexRoute: typeof PathlessLayoutTasksIndexRoute
   PathlessLayoutProjectsProjectIdIndexRoute: typeof PathlessLayoutProjectsProjectIdIndexRoute
   PathlessLayoutProjectsProjectIdTasksIndexRoute: typeof PathlessLayoutProjectsProjectIdTasksIndexRoute
@@ -222,6 +243,7 @@ const PathlessLayoutRouteChildren: PathlessLayoutRouteChildren = {
   PathlessLayoutTestRoute: PathlessLayoutTestRoute,
   PathlessLayoutTasksTaskIdRoute: PathlessLayoutTasksTaskIdRoute,
   PathlessLayoutProjectsIndexRoute: PathlessLayoutProjectsIndexRoute,
+  PathlessLayoutStagesIndexRoute: PathlessLayoutStagesIndexRoute,
   PathlessLayoutTasksIndexRoute: PathlessLayoutTasksIndexRoute,
   PathlessLayoutProjectsProjectIdIndexRoute:
     PathlessLayoutProjectsProjectIdIndexRoute,
