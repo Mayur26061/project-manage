@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Lock, Search, Settings } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -33,7 +34,6 @@ const Sidebar = () => {
             EDLIST
           </div>
         </div>
-        {/* Team */}
         <div className="flex items-center gap-5 border-y-[1.5px] border-gray-200 py-4 px-8 dark:border-gray-700">
             <img src="/logo.png" alt="Logo" width={40} height={40} />
             <div>
@@ -43,6 +43,20 @@ const Sidebar = () => {
                     <p className="text-xs text-gray-500">Private</p>
                 </div>
             </div>
+        </div>
+        <div>
+          <Link
+        to={"/stages"}>
+          <div className="flex items-center gap-3 px-8 py-4 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 border-b-[1.5px] border-gray-200">
+            <span>Stages</span> 
+          </div>
+        </Link>
+                  <Link
+        to={"/projects"}>
+          <div className="flex items-center gap-3 px-8 py-4 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 border-b-[1.5px] border-gray-200">
+            <span>Projects</span> 
+          </div>
+        </Link>
         </div>
       </div>
     </div>
