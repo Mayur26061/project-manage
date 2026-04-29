@@ -5,7 +5,7 @@ const RecordBadge = ({
   onRemove,
 }: {
   name: string;
-  onRemove?: () => void;
+  onRemove?: (ev: React.MouseEvent<SVGSVGElement>) => void;
 }) => {
   return (
     <div className="flex items-center gap-2 flex-nowrap border border-gray-300 rounded px-2 py-1 text-sm bg-gray-100">
@@ -13,7 +13,7 @@ const RecordBadge = ({
         {name[0].toUpperCase()}
       </div>
       <span>{name}</span>
-      <X className="w-4 h-4 text-gray-500 cursor-pointer" onClick={onRemove} />
+      <X className="w-4 h-4 text-gray-500 cursor-pointer" onClick={(ev) => onRemove?.(ev)} />
     </div>
   );
 };

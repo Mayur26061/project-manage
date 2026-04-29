@@ -24,6 +24,7 @@ interface Stages {
 
 function Stage() {
   const [stages, setStages] = useState<Stages[]>([]);
+  const [edit, setEdit] = useState<number>(0);
 
   useEffect(() => {
     console.log("Stage mounted");
@@ -32,19 +33,69 @@ function Stage() {
     });
   }, []);
 
-  return (
-    <div className="mx-3">
+  useEffect(() => {
+    const eventHandle = () => setEdit(0);
+    document.body.addEventListener("click", eventHandle);
+    return () => {
+      document.body.removeEventListener("click", eventHandle);
+    };
+  }, []);
+
+  const onRecordSelectorChange = (
+    { id, name }: { id: number; name: string },
+    stageId: number,
+  ): void => {
+    console.log("Selected project ID:", id);
+    setStages((prev) =>
+      prev.map((stage) => {
+        if (stage.id === stageId) {
+          if (stage.projectStages.some((ps) => ps.project.id === id)) {
+            return {
+              ...stage,
+              projectStages: [
+                ...stage.projectStages.filter((p) => p.project.id !== id),
+              ],
+            };
+          }
+          return {
+            ...stage,
+            projectStages: [...stage.projectStages, { project: { id, name } }],
+          };
+        }
+        return stage;
+      }),
+    );
+    axios.post(`/api/stage/update-project/${stageId}`, { project_id: id });
+  };
+
+  if (stages.length === 0) {
+    return (
+      <div className="mx-3">
         <div className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <h2>Stages</h2>
+          <h2>Stages</h2>
         </div>
-        <div className="flex gap-4 items-center p-4 border rounded px-3 ">
-            <h3 className="text-lg font-semibold w-md">Stage Name</h3>
-             <h3 className="text-lg font-semibold">Associated Projects</h3>
-        </div>
+        <p>No stages found.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-3" onClick={() => setEdit(0)}>
+      <div className="text-2xl font-bold mb-4 flex items-center gap-2">
+        <h2>Stages</h2>
+      </div>
+      <div className="flex gap-4 items-center p-4 border rounded px-3 ">
+        <h3 className="text-lg font-semibold w-md">Stage Name</h3>
+        <h3 className="text-lg font-semibold">Associated Projects</h3>
+      </div>
       {stages.map((stage) => (
         <div
           key={stage.id}
-          className="flex gap-4 p-4 border rounded px-3 "
+          className="flex gap-4 p-4 border rounded px-3"
+          onClick={(ev) => {
+            ev.stopPropagation();
+            setEdit(stage.id);
+          }}
         >
           <h3 className="w-md">{stage.name}</h3>
           <div className="flex gap-2 flex-wrap">
@@ -52,7 +103,8 @@ function Stage() {
               <RecordBadge
                 key={ps.project.id}
                 name={ps.project.name}
-                onRemove={() => {
+                onRemove={(ev) => {
+                  ev.stopPropagation();
                   setStages((prev) =>
                     prev.map((s) => {
                       if (s.id === stage.id) {
@@ -69,15 +121,17 @@ function Stage() {
                 }}
               />
             ))}
-            <RecordSelector
-              data={null}
-              isMany={true}
-              model="project"
-              inputClassName="p-2 w-auto border-0 outline-none focus-within:border-b-zinc-950 focus-within:border-b"
-              setData={() => {}}
-            />
-            {/* <RecordSelector
-            <input type="text" placeholder="Add project..." className="p-2 w-auto border-0 outline-none focus-within:border-b-zinc-950 focus-within:border-b" /> */}
+            {edit === stage.id && (
+              <RecordSelector
+                data={null}
+                isMany={true}
+                model="project"
+                inputClassName="p-2 w-auto border-0 outline-none focus-within:border-b-zinc-950 focus-within:border-b"
+                setData={({ id, name }) =>
+                  onRecordSelectorChange({ id, name }, stage.id)
+                }
+              />
+            )}
           </div>
         </div>
       ))}

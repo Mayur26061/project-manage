@@ -8,7 +8,23 @@ const stageCreateCheck = z.object({
 });
 
 export const getStages = asyncHandler(async (_req: reqObj, res: Response) => {
-    const stages = await prisma.stage.findMany();
+    const stages = await prisma.stage.findMany({
+        include: {
+            projectStages: {
+                include: {
+                    project: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            sequence: "asc"
+        }
+    });
     res.json(stages);
 });
 
