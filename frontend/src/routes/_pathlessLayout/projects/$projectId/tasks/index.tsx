@@ -3,12 +3,15 @@ import { Outlet, createFileRoute, useParams } from "@tanstack/react-router";
 import axios from "axios";
 import { useEffect, useState } from "react";
 export const Route = createFileRoute(
-  "/_pathlessLayout/projects/$projectId/tasks/"
+  "/_pathlessLayout/projects/$projectId/tasks/",
 )({
   component: TasksComponent,
 });
 
 export interface Result {
+  id: number;
+  project_id: number;
+  stage_id: number;
   stage: {
     name: string;
     id: number;
@@ -42,7 +45,11 @@ function TasksComponent() {
   return (
     <div className="p-4 flex gap-4 overflow-x-auto h-full">
       {data.map((stage) => (
-        <Stage key={stage.stage.id} stage={stage.stage} onTaskUpdate={setData} />
+        <Stage
+          key={stage.stage.id}
+          stage={{ ...stage.stage, project_id: stage.project_id }}
+          onTaskUpdate={setData}
+        />
       ))}
       <Outlet />
     </div>
