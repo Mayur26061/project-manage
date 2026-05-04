@@ -7,6 +7,10 @@ const stageCreateCheck = z.object({
     name: z.string().min(1),
 });
 
+const deleteStageCheck = z.object({
+    id: z.number().gt(0),
+});
+
 export const getStages = asyncHandler(async (_req: reqObj, res: Response) => {
     const stages = await prisma.stage.findMany({
         include: {
@@ -78,3 +82,10 @@ export const updateProjectStages = asyncHandler(
         res.json({ stage });
     }
 );
+
+export const deleteStage = asyncHandler(async (req: reqObj, res: Response) => {
+    const result = deleteStageCheck.parse({ id: Number(req.params.id) });
+    await prisma.stage.delete({ where: { id: result.id } });
+    res.json({ message: "Stage deleted successfully" });
+    return;
+});

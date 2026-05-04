@@ -1,7 +1,10 @@
 import RecordBadge from "@/components/RecordBadge";
 import RecordSelector from "@/components/RecordSelector";
+import SimpleCreateDialog from "@/components/SimpleCreateDialog";
+import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
 import axios from "axios";
+import { PlusCircle, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_pathlessLayout/stages/")({
@@ -27,20 +30,17 @@ function Stage() {
   const [edit, setEdit] = useState<number>(0);
 
   useEffect(() => {
-    console.log("Stage mounted");
     axios.get("/api/stage/stages").then((res) => {
       setStages(res.data);
     });
   }, []);
 
   useEffect(() => {
-    const eventHandle = () => setEdit(0);
-    document.body.addEventListener("click", eventHandle);
-    return () => {
-      document.body.removeEventListener("click", eventHandle);
-    };
-  }, []);
-
+    if (edit !== 0) {
+      document.querySelector<HTMLInputElement>(".input_selector")?.focus();
+    }
+  }, [edit]);
+  // const handleClickOutside = () => {
   const onRecordSelectorChange = (
     { id, name }: { id: number; name: string },
     stageId: number,
@@ -68,6 +68,30 @@ function Stage() {
     axios.post(`/api/stage/update-project/${stageId}`, { project_id: id });
   };
 
+  const onStageCreate = async (name: string) => {
+    try {
+      const response = await axios.post(`/api/stage/create`, { name });
+      if (response.status === 201) {
+        setStages((prev) => {
+          return [...prev, { ...response.data.stage, projectStages: [] }];
+        });
+      }
+    } catch (error) {
+      console.error("Error creating stage:", error);
+    }
+  };
+
+  const onStageDelete = async (id: number) => {
+    try {
+      const response = await axios.delete(`/api/stage/delete/${id}`);
+      if (response.status === 200) {
+        setStages((prev) => prev.filter((stage) => stage.id !== id));
+      }
+    } catch (error) {
+      console.error("Error deleting stage:", error);
+    }
+  };
+
   if (stages.length === 0) {
     return (
       <div className="mx-3">
@@ -83,22 +107,29 @@ function Stage() {
     <div className="mx-3" onClick={() => setEdit(0)}>
       <div className="text-2xl font-bold mb-4 flex items-center gap-2">
         <h2>Stages</h2>
+        <SimpleCreateDialog title="Create a Stage" onSave={onStageCreate}>
+          <Button className="p-2 mt-2">
+            <PlusCircle /> Create new
+          </Button>
+        </SimpleCreateDialog>
       </div>
       <div className="flex gap-4 items-center p-4 border rounded px-3 ">
-        <h3 className="text-lg font-semibold w-md">Stage Name</h3>
+        <h3 className="text-lg font-semibold w-3/12">Stage Name</h3>
         <h3 className="text-lg font-semibold">Associated Projects</h3>
       </div>
       {stages.map((stage) => (
         <div
           key={stage.id}
-          className="flex gap-4 p-4 border rounded px-3"
-          onClick={(ev) => {
-            ev.stopPropagation();
-            setEdit(stage.id);
-          }}
+          className="flex gap-4 p-4 border rounded px-3 relative"
         >
-          <h3 className="w-md">{stage.name}</h3>
-          <div className="flex gap-2 flex-wrap">
+          <h3 className="w-1/12">{stage.name}</h3>
+          <div
+            className="flex gap-2 flex-wrap pe-2 w-10/12 cursor-pointer"
+            onClick={(ev) => {
+              ev.stopPropagation();
+              setEdit(stage.id);
+            }}
+          >
             {stage.projectStages.map((ps) => (
               <RecordBadge
                 key={ps.project.id}
@@ -126,12 +157,21 @@ function Stage() {
                 data={null}
                 isMany={true}
                 model="project"
-                inputClassName="p-2 w-auto border-0 outline-none focus-within:border-b-zinc-950 focus-within:border-b"
+                inputClassName="p-2 w-auto border-0 border-b-zinc-950 border-b-2 input_selector"
                 setData={({ id, name }) =>
                   onRecordSelectorChange({ id, name }, stage.id)
                 }
               />
             )}
+          </div>
+          <div
+            className="cursor-pointer"
+            onClick={(ev) => {
+              ev.stopPropagation();
+              onStageDelete(stage.id);
+            }}
+          >
+            <Trash2 className="float-right" />
           </div>
         </div>
       ))}
