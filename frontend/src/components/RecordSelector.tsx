@@ -43,7 +43,6 @@ const RecordSelector = (props: Props) => {
     // Fetch records
     if (open) {
       const debounceFetch = setTimeout(() => {
-        setDropdownData({ isLoading: false, records: [] });
         fetchData(dataName);
       }, 300); // Debounce to avoid excessive calls
       return () => clearTimeout(debounceFetch);
@@ -106,8 +105,7 @@ const RecordSelector = (props: Props) => {
           ))}
           {dropdownData.isLoading ? (
             <LoaderCircle className="mx-auto my-2" />
-          ) : // <div className="p-2 text-gray-500">No records found</div>
-          dropdownData.records.length === 0 ? (
+          ) : dropdownData.records.length === 0 ? (
             <div className="p-2 text-gray-500">No records found</div>
           ) : null}
         </PopoverContent>
