@@ -1,24 +1,22 @@
-
 import React from "react";
-import { Lock, Search, Settings } from "lucide-react";
+import { Lock, LogOut, Search, Settings } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useAuth } from "@/lib/useAuth";
+import axios from "axios";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex min-h-screen w-full bg-gray-50 text-gray-900">
-      <Sidebar/>
+      <Sidebar />
       <main
         className={`dark:bg-dark-bg flex w-full flex-col bg-gray-50 md:pl-64 dark:text-white`}
       >
         <Navbar />
-        <div className="h-full">
-          {children}
-        </div>
+        <div className="h-full">{children}</div>
       </main>
     </div>
   );
 };
-
 
 const Sidebar = () => {
   const sidebarClasses = `flex flex-col fixed justify-between shadow-xl
@@ -35,28 +33,28 @@ const Sidebar = () => {
           </div>
         </div>
         <div className="flex items-center gap-5 border-y-[1.5px] border-gray-200 py-4 px-8 dark:border-gray-700">
-            <img src="/logo.png" alt="Logo" width={40} height={40} />
-            <div>
-                <h3 className="text-md font-bold tracking-wide dark:text-gray-200">Team Alpha</h3>
-                <div className="mt-1 flex items-start gap-2">
-                    <Lock className="h-3 w-3 mt-[0.1rem] text-gray-500 dark:text-gray-400" />
-                    <p className="text-xs text-gray-500">Private</p>
-                </div>
+          <img src="/logo.png" alt="Logo" width={40} height={40} />
+          <div>
+            <h3 className="text-md font-bold tracking-wide dark:text-gray-200">
+              Team Alpha
+            </h3>
+            <div className="mt-1 flex items-start gap-2">
+              <Lock className="h-3 w-3 mt-[0.1rem] text-gray-500 dark:text-gray-400" />
+              <p className="text-xs text-gray-500">Private</p>
             </div>
+          </div>
         </div>
         <div>
-          <Link
-        to={"/stages"}>
-          <div className="flex items-center gap-3 px-8 py-4 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 border-b-[1.5px] border-gray-200">
-            <span>Stages</span> 
-          </div>
-        </Link>
-                  <Link
-        to={"/projects"}>
-          <div className="flex items-center gap-3 px-8 py-4 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 border-b-[1.5px] border-gray-200">
-            <span>Projects</span> 
-          </div>
-        </Link>
+          <Link to={"/stages"}>
+            <div className="flex items-center gap-3 px-8 py-4 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 border-b-[1.5px] border-gray-200">
+              <span>Stages</span>
+            </div>
+          </Link>
+          <Link to={"/projects"}>
+            <div className="flex items-center gap-3 px-8 py-4 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 border-b-[1.5px] border-gray-200">
+              <span>Projects</span>
+            </div>
+          </Link>
         </div>
       </div>
     </div>
@@ -64,6 +62,19 @@ const Sidebar = () => {
 };
 
 const Navbar = () => {
+  const { logOut } = useAuth();
+
+  const onLogOut = () => {
+    axios
+      .post("/api/user/logout")
+      .then(() => {
+        logOut();
+      })
+      .catch((error) => {
+        console.error("Logout failed:", error);
+      });
+    // logOut();
+  };
   return (
     <div className="flex items-center justify-between bg-white px-4 py-3 dark:bg-black sticky top-0 z-30 shadow-md">
       <div className="flex items-center gap-8">
@@ -81,9 +92,12 @@ const Navbar = () => {
           href={"/setting"}
           className="h-min w-min rounded p-2 hover:bg-gray-600"
         > */}
-          <Settings className="h-6 w-6 cursor-pointer dark:text-white" />
+        <Settings className="h-6 w-6 cursor-pointer dark:text-white" />
         {/* </Link> */}
         <div className="mr-5 ml-2 hidden min-h-[2em] w-[0.1rem] bg-gray-200 md:inline-block"></div>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-600 text-sm text-white">
+          <LogOut className="h-4 w-4 cursor-pointer" onClick={onLogOut} />
+        </div>
       </div>
     </div>
   );

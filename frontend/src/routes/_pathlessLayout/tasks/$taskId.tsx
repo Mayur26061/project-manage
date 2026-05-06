@@ -186,7 +186,6 @@ function TaskComponent() {
         (updatedData as Partial<Record<typeof key, typeof value>>)[key] = value;
       }
     }
-    // debugger;
     const initialAssigneeIds = new Set(
       initData?.taskAssignments.map((u) => u.user.id) || [],
     );

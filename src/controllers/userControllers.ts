@@ -111,3 +111,11 @@ export const getLimitedUsers = asyncHandler(
     res.json({ data: users });
   }
 );
+
+export const logOut = asyncHandler(async (req: reqObj, res: Response) => {
+  res.setHeader(
+    "set-cookie",
+    `token=;Max-Age=0;Path=/api;HttpOnly;SameSite=Lax;`
+  );
+  res.status(200).json({ message: "Logged out successfully" });
+});
