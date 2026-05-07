@@ -157,3 +157,9 @@ export const updateTask = asyncHandler(async (req: Request, res: Response) => {
   });
   res.json({ task });
 });
+
+export const deleteTask = asyncHandler(async (req: Request, res: Response) => {
+  const taskId = Number(req.params.id);
+  await prisma.task.delete({ where: { id: taskId } });
+  res.status(204).send();
+});

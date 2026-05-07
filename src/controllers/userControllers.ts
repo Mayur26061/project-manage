@@ -6,12 +6,12 @@ import { asyncHandler, type reqObj, limitFetchParams } from "../utils.js";
 import { prisma } from "../lib/prisma.js";
 import type { UserWhereInput } from "@/generated/prisma/models.js";
 
-const signCheck = z.object({
+const signInCheck = z.object({
   email: z.email().min(1),
   password: z.string().min(6),
 });
 
-const signUpCheck = signCheck.extend({
+const signUpCheck = signInCheck.extend({
   first_name: z.string().min(1),
   last_name: z.string().min(1),
 });
@@ -23,10 +23,10 @@ const generateToken = (id: number, email: string) => {
 };
 
 export const signIn = asyncHandler(async (req: Request, res: Response) => {
-  const result = signCheck.parse(req.body);
+  const result = signInCheck.parse(req.body);
   const { email, password } = result;
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { email, active: true },
   });
   if (!user) {
     res.status(401).json({ message: "Invalid email or password" });
@@ -77,7 +77,7 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
 export const getMe = asyncHandler(async (req: reqObj, res: Response) => {
   const userId = req.headers.uid as unknown as number;
   const user = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id: userId, active: true },
     select: {
       id: true,
       first_name: true,

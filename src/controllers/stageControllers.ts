@@ -89,3 +89,15 @@ export const deleteStage = asyncHandler(async (req: reqObj, res: Response) => {
     res.json({ message: "Stage deleted successfully" });
     return;
 });
+
+export const updateStageName = asyncHandler(async (req: reqObj, res: Response) => {
+    const stageId = z.number().gt(0).parse(Number(req.params.id));
+    const result = stageCreateCheck.parse(req.body);
+    const stage = await prisma.stage.update({
+        where: { id: stageId },
+        data: {
+            name: result.name,
+        }
+    });
+    res.json({ stage });
+});
