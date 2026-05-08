@@ -59,7 +59,7 @@ model ProjectStage {
   project_id Int
   stage_id   Int
 
-  project Project @relation(fields: [project_id], references: [id])
+  project Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
   stage   Stage   @relation(fields: [stage_id], references: [id])
 
   @@unique([project_id, stage_id])
