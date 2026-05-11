@@ -25,18 +25,18 @@ const RecordSelector = (props: Props) => {
   }>({ isLoading: true, records: [] });
 
   const fetchData = async (title: string | undefined = "") => {
-    axios
-      .post(`/api/${props.model}/limited`, {
+    try {
+      const response = await axios.post(`/api/${props.model}/limited`, {
         offset: 0,
         title: title || "",
-      })
-      .then((response) => {
-        console.log("Fetched records:", response.data);
-        setDropdownData({ isLoading: false, records: response.data.data });
-      })
-      .catch((error) => {
-        console.error("Error fetching records:", error);
       });
+      if (response.status === 200) {
+        setDropdownData({ isLoading: false, records: response.data.data });
+      }
+    } catch (error) {
+      console.error("Error fetching records:", error);
+      setDropdownData({ isLoading: false, records: [] });
+    }
   };
 
   useEffect(() => {
@@ -50,7 +50,6 @@ const RecordSelector = (props: Props) => {
   }, [open, dataName]);
 
   useEffect(() => {
-    // Update input value when props.data.name changes
     if (inputRef.current) {
       inputRef.current.value = props.data?.name || "";
     }
@@ -61,25 +60,32 @@ const RecordSelector = (props: Props) => {
     props.setData({ id: recordId, name: dataName });
     if (!props.isMany) {
       inputRef.current!.value = dataName;
+    } else {
+      inputRef.current!.value = "";
     }
     setOpen(false);
+  };
+
+  const handleFocusOrClick = (ev: React.FocusEvent | React.MouseEvent) => {
+    ev.preventDefault();
+    setOpen(true);
+    (ev.currentTarget as HTMLElement)?.focus();
   };
 
   return (
     <>
       <Input
-        onClick={(ev) => {
-          ev.preventDefault();
-          setOpen(true);
-          ev.currentTarget.focus();
-        }}
+        onFocus={handleFocusOrClick}
+        // onClick={handleFocusOrClick}
         className={
           props.inputClassName ? props.inputClassName + " mt-2" : "mt-2"
         }
         type="text"
         ref={inputRef}
+        placeholder="Start typing..."
         defaultValue={props.data?.name || ""}
         onChange={(ev) => {
+          setOpen(true);
           setDataName(ev.target.value);
         }}
       />
