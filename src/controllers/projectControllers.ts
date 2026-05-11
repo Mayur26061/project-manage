@@ -19,7 +19,13 @@ const projectUpdateCheck = z.object({
 });
 
 export const getProjects = asyncHandler(async (_req: reqObj, res: Response) => {
-  const projects = await prisma.project.findMany({ orderBy: { created_at: "asc" }, include: { owner: { select: { id: true, name: true } }, customer: { select: { id: true, name: true } } } });
+  const projects = await prisma.project.findMany({
+    orderBy: { created_at: "asc" },
+    include: {
+      owner: { select: { id: true, name: true } },
+      customer: { select: { id: true, name: true } },
+    },
+  });
   res.json(projects);
 });
 
@@ -28,9 +34,9 @@ export const getLimitedProjects = asyncHandler(
     const data = limitFetchParams.parse(req.body);
     const titleFilter: ProjectWhereInput = data.title
       ? {
-        name: { contains: data.title, mode: "insensitive" },
-        active: true,
-      }
+          name: { contains: data.title, mode: "insensitive" },
+          active: true,
+        }
       : { active: true };
     const projects = await prisma.project.findMany({
       where: titleFilter,
@@ -40,7 +46,7 @@ export const getLimitedProjects = asyncHandler(
       orderBy: { name: "asc" },
     });
     res.json({ data: projects });
-  }
+  },
 );
 
 export const getSelectedProject = asyncHandler(
@@ -56,14 +62,14 @@ export const getSelectedProject = asyncHandler(
       include: {
         owner: { select: { id: true, name: true } },
         customer: { select: { id: true, name: true } },
-      }
+      },
     });
     if (!project) {
       res.status(404).json({ message: "Project not found" });
       return;
     }
     res.json({ project });
-  }
+  },
 );
 
 export const createProject = asyncHandler(
@@ -77,10 +83,14 @@ export const createProject = asyncHandler(
         owner_id: userId,
         description: result.description || "",
       },
+      include: {
+        owner: { select: { id: true, name: true } },
+        customer: { select: { id: true, name: true } },
+      },
     });
     res.status(201).json({ project });
     return;
-  }
+  },
 );
 
 export const getProjectStages = asyncHandler(
@@ -91,7 +101,7 @@ export const getProjectStages = asyncHandler(
       include: { stage: true },
     });
     res.json({ stages });
-  }
+  },
 );
 
 export const updateProject = asyncHandler(
@@ -102,8 +112,12 @@ export const updateProject = asyncHandler(
     if (result.name) data.name = result.name;
     if (result.description) data.description = result.description;
     if (result.owner_id) data.owner = { connect: { id: result.owner_id } };
-    if (result.customer_id !== undefined) data.customer = result.customer_id ? { connect: { id: result.customer_id } } : { disconnect: true };
-    if (result.date_end !== undefined) data.date_end = result.date_end ? new Date(result.date_end) : null;
+    if (result.customer_id !== undefined)
+      data.customer = result.customer_id
+        ? { connect: { id: result.customer_id } }
+        : { disconnect: true };
+    if (result.date_end !== undefined)
+      data.date_end = result.date_end ? new Date(result.date_end) : null;
     const existingProject = await prisma.project.findUnique({
       where: { id: projectId },
     });
@@ -118,7 +132,7 @@ export const updateProject = asyncHandler(
       },
     });
     res.json({ project: updatedProject });
-  }
+  },
 );
 
 export const deleteProject = asyncHandler(
@@ -126,4 +140,5 @@ export const deleteProject = asyncHandler(
     const projectId = z.number().gt(0).parse(Number(req.params.id));
     await prisma.project.delete({ where: { id: projectId } });
     res.status(204).send();
-  });
+  },
+);

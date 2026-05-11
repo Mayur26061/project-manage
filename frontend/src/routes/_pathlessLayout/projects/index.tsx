@@ -12,6 +12,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import SimpleCreateDialog from "@/components/SimpleCreateDialog";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_pathlessLayout/projects/")({
   component: ProjectsComponent,
@@ -48,30 +50,44 @@ function ProjectsComponent() {
     console.log("open project config");
   };
 
-  const onDeleteProject = (ev: React.MouseEvent, projectId: number) => {
+  const onDeleteProject = async (ev: React.MouseEvent, projectId: number) => {
     ev.preventDefault();
     ev.stopPropagation();
-    if (confirm("Are you sure you want to delete this project?")) {
-      axios.delete(`/api/project/delete/${projectId}`).then(() => {
+    try {
+      const response = await axios.delete(`/api/project/delete/${projectId}`);
+      if (response.status === 204) {
         setProjects(projects.filter((p) => p.id !== projectId));
-      });
+      }
+    } catch (error) {
+      console.error("Error deleting project:", error);
+    }
+  };
+
+  const onCreateProject = async (name: string) => {
+    try {
+      const response = await axios.post("/api/project/create", { name });
+      if (response.status === 201) {
+        setProjects((preprojects) => [...preprojects, response.data.project]);
+      }
+    } catch (error) {
+      console.error("Error creating project:", error);
     }
   };
 
   return (
     <>
       <div className="h-screen flex flex-wrap bg-white border-gray-300 border gap-1 p-3 content-start">
+        <div className="w-full flex items-center gap-3 mb-3">
+          <h1 className="text-2xl font-bold">Projects</h1>
+          <SimpleCreateDialog title="Create Project" onSave={onCreateProject}>
+            <Button variant="outline">Create Project</Button>
+          </SimpleCreateDialog>
+        </div>
         {projects.map((project) => (
           <div
             key={project.id}
             className="p-4 m-2 border rounded shadow w-96 h-48 relative"
           >
-            {/* // onClick={(ev) => { */}
-            {/* //   // ev.preventDefault();
-              //   // ev.stopPropagation();
-              //   // openProjecConfig(ev, project.id);
-              //   setOpen(true); */}
-            {/* // }} */}
             <Popover>
               <PopoverTrigger asChild>
                 <Settings className="absolute top-3 right-3 cursor-pointer text-gray-400 hover:text-gray-600" />
