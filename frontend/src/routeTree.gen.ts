@@ -13,6 +13,7 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as PathlessLayoutRouteImport } from './routes/_pathlessLayout'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PathlessLayoutTestRouteImport } from './routes/_pathlessLayout/test'
+import { Route as PathlessLayoutMyprofileRouteImport } from './routes/_pathlessLayout/myprofile'
 import { Route as PathlessLayoutTasksIndexRouteImport } from './routes/_pathlessLayout/tasks/index'
 import { Route as PathlessLayoutStagesIndexRouteImport } from './routes/_pathlessLayout/stages/index'
 import { Route as PathlessLayoutProjectsIndexRouteImport } from './routes/_pathlessLayout/projects/index'
@@ -37,6 +38,11 @@ const IndexRoute = IndexRouteImport.update({
 const PathlessLayoutTestRoute = PathlessLayoutTestRouteImport.update({
   id: '/test',
   path: '/test',
+  getParentRoute: () => PathlessLayoutRoute,
+} as any)
+const PathlessLayoutMyprofileRoute = PathlessLayoutMyprofileRouteImport.update({
+  id: '/myprofile',
+  path: '/myprofile',
   getParentRoute: () => PathlessLayoutRoute,
 } as any)
 const PathlessLayoutTasksIndexRoute =
@@ -79,6 +85,7 @@ const PathlessLayoutProjectsProjectIdTasksIndexRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
+  '/myprofile': typeof PathlessLayoutMyprofileRoute
   '/test': typeof PathlessLayoutTestRoute
   '/tasks/$taskId': typeof PathlessLayoutTasksTaskIdRoute
   '/projects': typeof PathlessLayoutProjectsIndexRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
+  '/myprofile': typeof PathlessLayoutMyprofileRoute
   '/test': typeof PathlessLayoutTestRoute
   '/tasks/$taskId': typeof PathlessLayoutTasksTaskIdRoute
   '/projects': typeof PathlessLayoutProjectsIndexRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_pathlessLayout': typeof PathlessLayoutRouteWithChildren
   '/signin': typeof SigninRoute
+  '/_pathlessLayout/myprofile': typeof PathlessLayoutMyprofileRoute
   '/_pathlessLayout/test': typeof PathlessLayoutTestRoute
   '/_pathlessLayout/tasks/$taskId': typeof PathlessLayoutTasksTaskIdRoute
   '/_pathlessLayout/projects/': typeof PathlessLayoutProjectsIndexRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/signin'
+    | '/myprofile'
     | '/test'
     | '/tasks/$taskId'
     | '/projects'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/signin'
+    | '/myprofile'
     | '/test'
     | '/tasks/$taskId'
     | '/projects'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_pathlessLayout'
     | '/signin'
+    | '/_pathlessLayout/myprofile'
     | '/_pathlessLayout/test'
     | '/_pathlessLayout/tasks/$taskId'
     | '/_pathlessLayout/projects/'
@@ -182,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/test'
       fullPath: '/test'
       preLoaderRoute: typeof PathlessLayoutTestRouteImport
+      parentRoute: typeof PathlessLayoutRoute
+    }
+    '/_pathlessLayout/myprofile': {
+      id: '/_pathlessLayout/myprofile'
+      path: '/myprofile'
+      fullPath: '/myprofile'
+      preLoaderRoute: typeof PathlessLayoutMyprofileRouteImport
       parentRoute: typeof PathlessLayoutRoute
     }
     '/_pathlessLayout/tasks/': {
@@ -230,6 +249,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface PathlessLayoutRouteChildren {
+  PathlessLayoutMyprofileRoute: typeof PathlessLayoutMyprofileRoute
   PathlessLayoutTestRoute: typeof PathlessLayoutTestRoute
   PathlessLayoutTasksTaskIdRoute: typeof PathlessLayoutTasksTaskIdRoute
   PathlessLayoutProjectsIndexRoute: typeof PathlessLayoutProjectsIndexRoute
@@ -240,6 +260,7 @@ interface PathlessLayoutRouteChildren {
 }
 
 const PathlessLayoutRouteChildren: PathlessLayoutRouteChildren = {
+  PathlessLayoutMyprofileRoute: PathlessLayoutMyprofileRoute,
   PathlessLayoutTestRoute: PathlessLayoutTestRoute,
   PathlessLayoutTasksTaskIdRoute: PathlessLayoutTasksTaskIdRoute,
   PathlessLayoutProjectsIndexRoute: PathlessLayoutProjectsIndexRoute,

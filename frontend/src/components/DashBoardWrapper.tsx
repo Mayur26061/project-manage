@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Lock,
-  LogOut,
-  Search,
-  User,
-  UserRoundPen,
-} from "lucide-react";
+import { Lock, LogOut, Search, User, UserRoundPen } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/useAuth";
 import axios from "axios";
@@ -94,28 +88,19 @@ const Navbar = () => {
           />
         </div>
       </div>
-      <div className="flex items-center  mx-5">
-        {/* <Link
-          href={"/setting"}
-          className="h-min w-min rounded p-2 hover:bg-gray-600"
-        >
-         <Settings className="h-6 w-6 cursor-pointer dark:text-white" />
-         </Link>
-        <div className="mr-5 ml-2 hidden min-h-[2em] w-[0.1rem] bg-gray-200 md:inline-block"></div>
-          */}
+      <div className="flex items-center mx-5">
         <Popover>
           <PopoverTrigger asChild>
             <User className="h-6 w-6 cursor-pointer dark:text-white" />
           </PopoverTrigger>
           <PopoverContent className="w-32 p-1" align="center">
-            <div className="flex h-8 items-center justify-center gap-2 cursor-pointer hover:bg-gray-200">
-              {/* <Link
-          href={"/setting"}
-        > */}
+            <Link
+              className="flex h-8 items-center justify-center gap-2 cursor-pointer hover:bg-gray-200"
+              to={"/myprofile"}
+            >
               <UserRoundPen className="h-4 w-4" />
               <span>My Profile</span>
-              {/* </Link> */}
-            </div>
+            </Link>
             <div
               className="flex h-8 items-center justify-center gap-2 cursor-pointer hover:bg-gray-200"
               onClick={onLogOut}
