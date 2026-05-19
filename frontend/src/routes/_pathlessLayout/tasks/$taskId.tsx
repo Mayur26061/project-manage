@@ -13,8 +13,8 @@ import {
 import Priority from "@/components/Priority";
 import RecordSelector from "@/components/RecordSelector";
 import { format } from "date-fns";
-import { ChevronDownIcon, Dot } from "lucide-react";
-import { Outlet, createFileRoute, useParams } from "@tanstack/react-router";
+import { ChevronDownIcon, Dot, Trash2 } from "lucide-react";
+import { Outlet, createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
 import RecordBadge from "@/components/RecordBadge";
 
 export const Route = createFileRoute("/_pathlessLayout/tasks/$taskId")({
@@ -77,6 +77,7 @@ function TaskComponent() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [stateOpen, setStateOpen] = useState(false);
   const [initData, setInitData] = useState<Task | null>(null);
+  const navigate = useNavigate();
 
   const formReducerFunction = (state: Task, action: actions) => {
     switch (action.type) {
@@ -218,6 +219,21 @@ function TaskComponent() {
     } catch (error) {
       dispatch({ type: "SET_INITIAL", payload: initData! });
       console.error("Error updating task: ", error);
+    }
+  };
+
+  const onDeleteTask = async () => {
+    try {
+      const res = await axios.delete(`/api/task/delete/${params.taskId}`);
+      if (res.status !== 204) {
+        throw Error("")
+      }
+      navigate({
+          to: "/projects/$projectId/tasks",
+          params: { projectId: String(formData.project_id) },
+      });
+    } catch {
+      console.log("Something went wrong")
     }
   };
 
@@ -368,10 +384,16 @@ function TaskComponent() {
           placeholder="Enter Description here"
         />
       </div>
-      <div className="flex gap-2">
-        <Button onClick={onSaveChanges}>Save</Button>
-        <Button variant={"outline"} onClick={onDiscardChanges}>
-          Cancel
+      <div className="flex gap-2 justify-between">
+        <div>
+          <Button onClick={onSaveChanges}>Save</Button>
+          <Button variant={"outline"} onClick={onDiscardChanges}>
+            Cancel
+          </Button>
+        </div>
+        <Button variant={"destructive"} onClick={onDeleteTask}>
+          <Trash2 />
+          Delete
         </Button>
       </div>
       <Outlet />

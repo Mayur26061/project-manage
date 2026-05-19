@@ -45,7 +45,7 @@ model Project {
   active        Boolean        @default(true)
   date_end    DateTime? 
   owner_id      Int
-  owner         User           @relation(fields: [owner_id], references: [id])
+  owner         User           @relation(fields: [owner_id], references: [id], onDelete: Cascade)
   customer_id   Int?
   customer      User?          @relation(name: "ProjectCustomer", fields: [customer_id], references: [id])
   tasks         Task[]
@@ -60,7 +60,7 @@ model ProjectStage {
   stage_id   Int
 
   project Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  stage   Stage   @relation(fields: [stage_id], references: [id])
+  stage   Stage   @relation(fields: [stage_id], references: [id], onDelete: Cascade)
 
   @@unique([project_id, stage_id])
   @@map("project_stages")
@@ -71,8 +71,8 @@ model TaskAssignment {
   task_id     Int
   user_id     Int
   assigned_at DateTime @default(now())
-  task        Task     @relation(fields: [task_id], references: [id])
-  user        User     @relation(fields: [user_id], references: [id])
+  task        Task     @relation(fields: [task_id], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([task_id, user_id])
   @@map("task_assignments")
@@ -90,7 +90,7 @@ model Task {
   stage_id        Int?
   stage           Stage?           @relation(fields: [stage_id], references: [id])
   project_id      Int
-  project         Project          @relation(fields: [project_id], references: [id])
+  project         Project          @relation(fields: [project_id], references: [id], onDelete: Cascade)
   deadline        DateTime?
   status          TaskStatus       @default(IN_PROGRESS)
   taskAssignments TaskAssignment[]
