@@ -1,5 +1,6 @@
 import { AuthContext, type User } from "@/lib/useAuth";
 import axios from "axios";
+import { Loader } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -26,6 +27,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser({ isLoading: false, user: null });
       });
   }, []);
+
+  if (user.isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader /> Loading...
+      </div>
+    );
+  }
 
   return <AuthContext value={{ user, logOut, login }}>{children}</AuthContext>;
 };
