@@ -1,57 +1,64 @@
 import React from "react";
-import { Lock, LogOut, Search, User, UserRoundPen } from "lucide-react";
+import { LogOut, Menu, User, UserRoundPen, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/useAuth";
 import axios from "axios";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
+  const [openSidebar, setOpenSidebar] = React.useState(false);
+
   return (
     <div className="flex min-h-screen w-full bg-gray-50 text-gray-900">
-      <Sidebar />
+      <Sidebar
+        className={`max-md:${openSidebar ? "block" : "hidden"}`}
+        setOpenSidebar={setOpenSidebar}
+      />
       <main
         className={`dark:bg-dark-bg flex w-full flex-col bg-gray-50 md:pl-64 dark:text-white`}
       >
-        <Navbar />
+        {openSidebar && (
+          <div
+            className="bg-gray-900 z-30 w-full h-screen md:hidden absolute opacity-50 "
+            onClick={() => setOpenSidebar(false)}
+          ></div>
+        )}
+        <Navbar setOpenSidebar={setOpenSidebar} />
         <div className="h-full">{children}</div>
       </main>
     </div>
   );
 };
 
-const Sidebar = () => {
-  const sidebarClasses = `flex flex-col fixed justify-between shadow-xl
-    transition-all duration-300 h-full z-40 dark:bg-black overflow-y-auto
-    bg-white w-64 max-md:hidden`;
+interface SidebarProps {
+  className?: string;
+  setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+}
+const Sidebar = ({ className = "", setOpenSidebar }: SidebarProps) => {
+  const sidebarClasses = `flex flex-col fixed justify-between shadow-xl transition-all duration-300 h-full z-40 dark:bg-black overflow-y-auto bg-white w-64 ${className}`;
 
   return (
     <div className={`${sidebarClasses}`}>
       <div className="flex h-full w-full flex-col justify-start">
-        {/* LOGO */}
-        <div className="z-50 flex w-64 min-w-14 items-center justify-between bg-white px-6 pt-3 dark:bg-black">
-          <div className="text-xl font-bold text-gray-800 dark:text-white">
-            EDLIST
-          </div>
-        </div>
-        <div className="flex items-center gap-5 border-y-[1.5px] border-gray-200 py-4 px-8 dark:border-gray-700">
-          <img src="/logo.png" alt="Logo" width={40} height={40} />
-          <div>
-            <h3 className="text-md font-bold tracking-wide dark:text-gray-200">
-              Team Alpha
-            </h3>
-            <div className="mt-1 flex items-start gap-2">
-              <Lock className="h-3 w-3 mt-[0.1rem] text-gray-500 dark:text-gray-400" />
-              <p className="text-xs text-gray-500">Private</p>
+        <div className="z-50 flex w-64 min-w-14 items-center justify-between bg-white px-6 py-3 dark:bg-black">
+          <Link to={"/"}>
+            <div className="text-xl font-bold text-gray-800 dark:text-white">
+              TaskForge
             </div>
-          </div>
+          </Link>
+          <X
+            size={18}
+            className="cursor-pointer active:bg-gray-200 md:hidden"
+            onClick={() => setOpenSidebar(false)}
+          />
         </div>
         <div>
-          <Link to={"/stages"}>
-            <div className="flex items-center gap-3 px-8 py-4 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 border-b-[1.5px] border-gray-200">
+          <Link to={"/stages"} onClick={() => setOpenSidebar(false)}>
+            <div className="flex items-center gap-3 px-8 py-4 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 border-y-[1.5px] border-gray-200">
               <span>Stages</span>
             </div>
           </Link>
-          <Link to={"/projects"}>
+          <Link to={"/projects"} onClick={() => setOpenSidebar(false)}>
             <div className="flex items-center gap-3 px-8 py-4 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 border-b-[1.5px] border-gray-200">
               <span>Projects</span>
             </div>
@@ -62,7 +69,11 @@ const Sidebar = () => {
   );
 };
 
-const Navbar = () => {
+interface NavbarProps {
+  setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  // You can add props here if needed in the future
+}
+const Navbar = ({ setOpenSidebar }: NavbarProps) => {
   const { logOut } = useAuth();
 
   const onLogOut = () => {
@@ -77,16 +88,15 @@ const Navbar = () => {
     // logOut();
   };
   return (
-    <div className="flex items-center justify-between bg-white px-4 py-3 dark:bg-black sticky top-0 z-30 shadow-md">
-      <div className="flex items-center gap-8">
-        <div className="relative flex h-min w-50">
-          <Search className="absolute top-1/2 left-1 mr-2 h-5 w-5 -translate-y-1/2 transform cursor-pointer text-gray-400 dark:text-white" />
-          <input
-            className="w-full rounded border-none bg-gray-100 p-2 pl-8 placeholder-gray-400 focus:border-transparent focus:outline-none dark:bg-gray-700 dark:text-white dark:placeholder-white"
-            placeholder="Search..."
-            type="search"
-          />
-        </div>
+    <div className="flex items-center justify-between bg-white px-4 py-3 dark:bg-black sticky top-0 z-30 shadow-md md:flex-row-reverse">
+      <div className="flex items-center gap-8 md:hidden">
+        <Menu className="cursor-pointer" onClick={() => setOpenSidebar(true)} />
+        <Link
+          to={"/"}
+          className="text-xl font-bold text-gray-800 dark:text-white"
+        >
+          TaskForge
+        </Link>
       </div>
       <div className="flex items-center mx-5">
         <Popover>
