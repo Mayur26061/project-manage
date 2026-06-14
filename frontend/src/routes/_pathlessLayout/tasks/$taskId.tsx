@@ -14,7 +14,12 @@ import Priority from "@/components/Priority";
 import RecordSelector from "@/components/RecordSelector";
 import { format } from "date-fns";
 import { ChevronDownIcon, Dot, Trash2 } from "lucide-react";
-import { Outlet, createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
+import {
+  Outlet,
+  createFileRoute,
+  useParams,
+  useNavigate,
+} from "@tanstack/react-router";
 import RecordBadge from "@/components/RecordBadge";
 
 export const Route = createFileRoute("/_pathlessLayout/tasks/$taskId")({
@@ -158,13 +163,7 @@ function TaskComponent() {
     });
   }, [params.taskId]);
 
-  const onDiscardChanges = () => {
-    if (initData) {
-      dispatch({ type: "SET_INITIAL", payload: initData });
-    }
-  };
-
-  const onSaveChanges = async () => {
+  async function onSaveChanges() {
     // Implement save logic here
     const keyChecks: (keyof UpdateTaskPayload)[] = [
       "name",
@@ -214,26 +213,35 @@ function TaskComponent() {
       if (response.status !== 200) {
         throw new Error("Failed to update task");
       }
-      dispatch({ type: "SET_INITIAL", payload: response.data.task });
       setInitData(response.data.task);
     } catch (error) {
       dispatch({ type: "SET_INITIAL", payload: initData! });
       console.error("Error updating task: ", error);
     }
-  };
+  }
+
+  useEffect(() => {
+    if (!initData) return;
+
+    const timer = setTimeout(() => {
+      onSaveChanges();
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [formData]);
 
   const onDeleteTask = async () => {
     try {
       const res = await axios.delete(`/api/task/delete/${params.taskId}`);
       if (res.status !== 204) {
-        throw Error("")
+        throw Error("");
       }
       navigate({
-          to: "/projects/$projectId/tasks",
-          params: { projectId: String(formData.project_id) },
+        to: "/projects/$projectId/tasks",
+        params: { projectId: String(formData.project_id) },
       });
     } catch {
-      console.log("Something went wrong")
+      console.log("Something went wrong");
     }
   };
 
@@ -384,13 +392,7 @@ function TaskComponent() {
           placeholder="Enter Description here"
         />
       </div>
-      <div className="flex gap-2 justify-between">
-        <div>
-          <Button onClick={onSaveChanges}>Save</Button>
-          <Button variant={"outline"} onClick={onDiscardChanges}>
-            Cancel
-          </Button>
-        </div>
+      <div className="flex gap-2 justify-end">
         <Button variant={"destructive"} onClick={onDeleteTask}>
           <Trash2 />
           Delete
