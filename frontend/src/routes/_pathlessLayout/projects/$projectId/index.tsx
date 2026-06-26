@@ -102,8 +102,8 @@ function ProjectComponent() {
     },
   );
 
- const onSaveChanges = async () => {
-      const keyChecks: (keyof UpdateProjectPayload)[] = [
+  const onSaveChanges = async () => {
+    const keyChecks: (keyof UpdateProjectPayload)[] = [
       "name",
       "description",
       "date_end",
@@ -115,9 +115,7 @@ function ProjectComponent() {
     const updatedData: Partial<UpdateProjectPayload> = {};
     for (const key of keyChecks) {
       const value = formData[key];
-      if (
-        formData[key] !== project?.[key]
-      ) {
+      if (formData[key] !== project?.[key]) {
         (updatedData as Partial<Record<typeof key, typeof value>>)[key] = value;
       }
     }
@@ -139,11 +137,17 @@ function ProjectComponent() {
       dispatch({ type: "SET_INITIAL", payload: project! });
       console.error("Error updating project: ", error);
     }
- };
- 
- const onDiscardChanges = () => {
-  dispatch({ type: "SET_INITIAL", payload: project! });
- };
+  };
+
+  useEffect(() => {
+    if (!project) return;
+
+    const timeoutId = setTimeout(() => {
+      onSaveChanges();
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [formData]);
 
   useEffect(() => {
     axios.get(`/api/project/${params.projectId}`).then((response) => {
@@ -235,12 +239,7 @@ function ProjectComponent() {
           placeholder="Enter Description here"
         />
       </div>
-        <div className="flex gap-2">
-        <Button onClick={onSaveChanges}>Save</Button>
-        <Button variant={"outline"} onClick={onDiscardChanges}>
-          Cancel
-        </Button>
-      </div>
+      <div className="flex gap-2"></div>
       <Outlet />
     </div>
   );
