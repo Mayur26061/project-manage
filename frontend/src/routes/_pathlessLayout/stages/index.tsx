@@ -1,3 +1,4 @@
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 import RecordBadge from "@/components/RecordBadge";
 import RecordSelector from "@/components/RecordSelector";
 import SimpleCreateDialog from "@/components/SimpleCreateDialog";
@@ -164,15 +165,17 @@ function Stage() {
               />
             )}
           </div>
-          <div
-            className="cursor-pointer"
-            onClick={(ev) => {
+          <ConfirmationDialog
+            itemName={`"${stage.name}" stage`}
+            onConfirm={(ev) => {
               ev.stopPropagation();
-              onStageDelete(stage.id);
+              return onStageDelete(stage.id);
             }}
           >
-            <Trash2 className="float-right" />
-          </div>
+            <div className="cursor-pointer">
+              <Trash2 className="float-right" />
+            </div>
+          </ConfirmationDialog>
         </div>
       ))}
     </div>

@@ -21,6 +21,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import RecordBadge from "@/components/RecordBadge";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 export const Route = createFileRoute("/_pathlessLayout/tasks/$taskId")({
   component: TaskComponent,
@@ -393,10 +394,15 @@ function TaskComponent() {
         />
       </div>
       <div className="flex gap-2 justify-end">
-        <Button variant={"destructive"} onClick={onDeleteTask}>
-          <Trash2 />
-          Delete
-        </Button>
+        <ConfirmationDialog
+          itemName={`"${formData.name}" task`}
+          onConfirm={onDeleteTask}
+        >
+          <Button variant={"destructive"}>
+            <Trash2 />
+            Delete
+          </Button>
+        </ConfirmationDialog>
       </div>
       <Outlet />
     </div>

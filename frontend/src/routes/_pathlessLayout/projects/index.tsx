@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/popover";
 import SimpleCreateDialog from "@/components/SimpleCreateDialog";
 import { Button } from "@/components/ui/button";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 export const Route = createFileRoute("/_pathlessLayout/projects/")({
   component: ProjectsComponent,
@@ -107,13 +108,15 @@ function ProjectsComponent() {
                   <SquarePenIcon className="cursor-pointer text-gray-400 hover:text-gray-600" />
                   Edit
                 </div>
-                <div
-                  className="flex items-center gap-2 hover:bg-gray-200 p-3"
-                  onClick={(ev) => onDeleteProject(ev, project.id)}
+                <ConfirmationDialog
+                  itemName={project.name}
+                  onConfirm={(ev) => onDeleteProject(ev, project.id)}
                 >
-                  <Trash2 className="cursor-pointer text-gray-400 hover:text-gray-600" />
-                  Delete
-                </div>
+                  <div className="flex items-center gap-2 hover:bg-gray-200 p-3">
+                    <Trash2 className="cursor-pointer text-gray-400 hover:text-gray-600" />
+                    Delete
+                  </div>
+                </ConfirmationDialog>
               </PopoverContent>
             </Popover>
             <Link
