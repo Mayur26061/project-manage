@@ -85,6 +85,15 @@ export const updateProjectStages = asyncHandler(
 
 export const deleteStage = asyncHandler(async (req: reqObj, res: Response) => {
     const result = deleteStageCheck.parse({ id: Number(req.params.id) });
+    const anyTask = await prisma.task.findFirst({
+        where: {
+            stage_id: result.id,
+        },
+    });
+    if (anyTask) {
+        res.status(400).json({ message: "Cannot delete stage with associated tasks" });
+        return;
+    }
     await prisma.stage.delete({ where: { id: result.id } });
     res.json({ message: "Stage deleted successfully" });
     return;

@@ -88,7 +88,7 @@ model Task {
   updated_at      DateTime         @updatedAt
   active          Boolean          @default(true)
   stage_id        Int?
-  stage           Stage?           @relation(fields: [stage_id], references: [id])
+  stage           Stage?           @relation(fields: [stage_id], references: [id], onDelete: Restrict)
   project_id      Int
   project         Project          @relation(fields: [project_id], references: [id], onDelete: Cascade)
   deadline        DateTime?
