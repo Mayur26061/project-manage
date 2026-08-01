@@ -18,9 +18,19 @@ const projectUpdateCheck = z.object({
   date_end: z.string().optional().nullable(),
 });
 
-export const getProjects = asyncHandler(async (_req: reqObj, res: Response) => {
+export const getProjects = asyncHandler(async (req: reqObj, res: Response) => {
+  const data = limitFetchParams.parse(req.query);
+  const titleFilter: ProjectWhereInput = data.title
+    ? {
+      name: { contains: data.title, mode: "insensitive" },
+      active: true,
+    }
+    : { active: true };
   const projects = await prisma.project.findMany({
+    where: titleFilter,
     orderBy: { created_at: "asc" },
+    skip: data.offset,
+    take: data.limit,
     include: {
       owner: { select: { id: true, name: true } },
       customer: { select: { id: true, name: true } },
@@ -28,26 +38,6 @@ export const getProjects = asyncHandler(async (_req: reqObj, res: Response) => {
   });
   res.json(projects);
 });
-
-export const getLimitedProjects = asyncHandler(
-  async (req: reqObj, res: Response) => {
-    const data = limitFetchParams.parse(req.body);
-    const titleFilter: ProjectWhereInput = data.title
-      ? {
-          name: { contains: data.title, mode: "insensitive" },
-          active: true,
-        }
-      : { active: true };
-    const projects = await prisma.project.findMany({
-      where: titleFilter,
-      select: { id: true, name: true },
-      take: 8,
-      skip: data.offset,
-      orderBy: { name: "asc" },
-    });
-    res.json({ data: projects });
-  },
-);
 
 export const getSelectedProject = asyncHandler(
   async (req: reqObj, res: Response) => {

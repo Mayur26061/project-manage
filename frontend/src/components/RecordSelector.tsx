@@ -10,7 +10,7 @@ import { LoaderCircle } from "lucide-react";
 type Props = {
   data: { id: number; name: string } | null;
   setData: (data: { id: number; name: string }) => void;
-  model: "project" | "task" | "user";
+  model: "projects" | "tasks" | "users";
   inputClassName?: string;
   isMany?: boolean;
 };
@@ -26,12 +26,9 @@ const RecordSelector = (props: Props) => {
 
   const fetchData = async (title: string | undefined = "") => {
     try {
-      const response = await axios.post(`/api/${props.model}/limited`, {
-        offset: 0,
-        title: title || "",
-      });
+      const response = await axios.get(`/api/${props.model}?offset=0&title=${title}`);
       if (response.status === 200) {
-        setDropdownData({ isLoading: false, records: response.data.data });
+        setDropdownData({ isLoading: false, records:  response.data.map((d: any)=> ({id: d.id, name: d.name})) });
       }
     } catch (error) {
       console.error("Error fetching records:", error);

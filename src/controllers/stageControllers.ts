@@ -1,7 +1,8 @@
 import type { Response } from "express";
 import z from "zod";
 import { prisma } from "../lib/prisma.js";
-import { asyncHandler, type reqObj } from "../utils.js";
+import { asyncHandler, limitFetchParams, type reqObj } from "../utils.js";
+import type { StageWhereInput } from "@/generated/prisma/internal/prismaNamespaceBrowser.js";
 
 const stageCreateCheck = z.object({
     name: z.string().min(1),
@@ -11,8 +12,16 @@ const deleteStageCheck = z.object({
     id: z.number().gt(0),
 });
 
-export const getStages = asyncHandler(async (_req: reqObj, res: Response) => {
+export const getStages = asyncHandler(async (req: reqObj, res: Response) => {
+    const data = limitFetchParams.parse(req.query);
+    const titleFilter: StageWhereInput = data.title
+        ? {
+            name: { contains: data.title, mode: "insensitive" },
+            active: true,
+        }
+        : { active: true };
     const stages = await prisma.stage.findMany({
+        where: titleFilter,
         include: {
             projectStages: {
                 include: {
@@ -25,6 +34,8 @@ export const getStages = asyncHandler(async (_req: reqObj, res: Response) => {
                 }
             }
         },
+        take: data.limit,
+        skip: data.offset,
         orderBy: {
             sequence: "asc"
         }
@@ -45,13 +56,15 @@ export const createStage = asyncHandler(async (req: reqObj, res: Response) => {
 
 const updateProjectStageCheck = z.object({
     project_id: z.number().gt(0),
+    operation: z.enum(["add", "remove"]),
 });
 
 export const updateProjectStages = asyncHandler(
     async (req: reqObj, res: Response) => {
         const result = updateProjectStageCheck.parse(req.body);
         const stage_id = z.number().gt(0).parse(Number(req.params.id));
-        const { project_id } = result;
+        const { project_id, operation } = result;
+
         let stage = await prisma.projectStage.findUnique({
             where: {
                 project_id_stage_id: {
@@ -60,14 +73,14 @@ export const updateProjectStages = asyncHandler(
                 },
             },
         });
-        if (!stage) {
+        if (operation === "add" && !stage) {
             stage = await prisma.projectStage.create({
                 data: {
                     project: { connect: { id: project_id } },
                     stage: { connect: { id: stage_id } },
                 },
             });
-        } else {
+        } else if (operation === "remove" && stage) {
             await prisma.projectStage.delete({
                 where: {
                     project_id_stage_id: {

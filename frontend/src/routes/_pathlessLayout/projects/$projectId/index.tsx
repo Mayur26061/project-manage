@@ -125,7 +125,7 @@ function ProjectComponent() {
     console.log("Updated Data: ", updatedData);
     try {
       const response = await axios.put(
-        `/api/project/update/${params.projectId}`,
+        `/api/projects/${params.projectId}`,
         updatedData,
       );
       if (response.status !== 200) {
@@ -150,7 +150,7 @@ function ProjectComponent() {
   }, [formData]);
 
   useEffect(() => {
-    axios.get(`/api/project/${params.projectId}`).then((response) => {
+    axios.get(`/api/projects/${params.projectId}`).then((response) => {
       dispatch({ type: "SET_INITIAL", payload: response.data.project });
       setProject(response.data.project);
     });
@@ -211,7 +211,7 @@ function ProjectComponent() {
           <Label>Customer</Label>
           <RecordSelector
             data={formData.customer || null}
-            model="user"
+            model="users"
             setData={(customer) => {
               dispatch({ type: "SET_CUSTOMER_ID", payload: customer });
             }}
@@ -221,7 +221,7 @@ function ProjectComponent() {
           <Label>Project Manager</Label>
           <RecordSelector
             data={formData.owner}
-            model="user"
+            model="users"
             setData={(owner) => {
               dispatch({ type: "SET_OWNER_ID", payload: owner });
             }}

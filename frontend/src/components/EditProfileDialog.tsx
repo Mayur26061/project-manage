@@ -24,7 +24,7 @@ export const EditProfileDialog = (props: Props) => {
   const { login } = useAuth();
   const onSaveName = async () => {
     try {
-      const response = await axios.put("/api/user/update", {
+      const response = await axios.put("/api/users/update", {
         first_name: fname,
         last_name: lname,
       });

@@ -78,7 +78,7 @@ const Navbar = ({ setOpenSidebar }: NavbarProps) => {
 
   const onLogOut = () => {
     axios
-      .post("/api/user/logout")
+      .post("/api/auth/logout")
       .then(() => {
         logOut();
       })

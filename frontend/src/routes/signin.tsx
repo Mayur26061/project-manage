@@ -34,7 +34,7 @@ function LoginComponent() {
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     try {
-      const response = await axios.post("/api/user/signin", {
+      const response = await axios.post("/api/auth/signin", {
         email: email,
         password: password,
       });

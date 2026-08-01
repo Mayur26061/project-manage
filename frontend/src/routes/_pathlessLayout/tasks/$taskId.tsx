@@ -158,7 +158,7 @@ function TaskComponent() {
   );
 
   useEffect(() => {
-    axios.get(`/api/task/${params.taskId}`).then((response) => {
+    axios.get(`/api/tasks/${params.taskId}`).then((response) => {
       dispatch({ type: "SET_INITIAL", payload: response.data.task });
       setInitData(response.data.task);
     });
@@ -207,7 +207,7 @@ function TaskComponent() {
       return;
     }
     try {
-      const response = await axios.put(`/api/task/update/${params.taskId}`, {
+      const response = await axios.put(`/api/tasks/${params.taskId}`, {
         ...updatedData,
         assignees: commands,
       });
@@ -233,7 +233,7 @@ function TaskComponent() {
 
   const onDeleteTask = async () => {
     try {
-      const res = await axios.delete(`/api/task/delete/${params.taskId}`);
+      const res = await axios.delete(`/api/tasks/${params.taskId}`);
       if (res.status !== 204) {
         throw Error("");
       }
@@ -309,7 +309,7 @@ function TaskComponent() {
             setData={(project) =>
               dispatch({ type: "SET_PROJECT_ID", payload: project })
             }
-            model="project"
+            model="projects"
           />
         </div>
         <div className="w-1/2">
@@ -366,7 +366,7 @@ function TaskComponent() {
             <RecordSelector
               data={null}
               isMany={true}
-              model="user"
+              model="users"
               inputClassName="w-auto border-0 outline-none border-b-2"
               setData={OnSelectAssignee}
             />

@@ -38,7 +38,7 @@ function ProjectsComponent() {
 
   useEffect(() => {
     axios
-      .get("/api/project/projects")
+      .get("/api/projects")
       .then((response) => setProjects(response.data));
   }, []);
 
@@ -55,7 +55,7 @@ function ProjectsComponent() {
     ev.preventDefault();
     ev.stopPropagation();
     try {
-      const response = await axios.delete(`/api/project/delete/${projectId}`);
+      const response = await axios.delete(`/api/projects/${projectId}`);
       if (response.status === 204) {
         setProjects(projects.filter((p) => p.id !== projectId));
       }
@@ -66,7 +66,7 @@ function ProjectsComponent() {
 
   const onCreateProject = async (name: string) => {
     try {
-      const response = await axios.post("/api/project/create", { name });
+      const response = await axios.post("/api/projects", { name });
       if (response.status === 201) {
         setProjects((preprojects) => [...preprojects, response.data.project]);
       }

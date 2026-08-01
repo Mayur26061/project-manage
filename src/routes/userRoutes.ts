@@ -1,15 +1,11 @@
 import express from "express";
-import { changePassword, editProfile, getLimitedUsers, getMe, logOut, signIn, signUp } from "../controllers/userControllers.js";
+import { updateProfile, getUsers, getMe } from "../controllers/userControllers.js";
 import { authenticateToken } from "..//middleware/index.js";
 
 const router = express.Router();
 
-router.post("/signin", signIn);
-router.post("/signup", signUp);
+router.get("/", authenticateToken, getUsers);
 router.get("/me", authenticateToken, getMe);
-router.post("/limited", authenticateToken, getLimitedUsers);
-router.post("/logout", authenticateToken, logOut);
-router.post("/change-password", authenticateToken, changePassword);
-router.put("/update", authenticateToken, editProfile);
+router.put("/update", authenticateToken, updateProfile);
 
 export default router;

@@ -3,10 +3,10 @@ import express from "express";
 
 const router = express.Router();
 
-router.get("/stages", getStages);
-router.post("/create", createStage);
-router.post("/update-project/:id", updateProjectStages);
-router.delete("/delete/:id", deleteStage);
-router.put("/update/:id", updateStageName);
+router.get("/", getStages);
+router.post("/", createStage);
+router.delete("/:id", deleteStage);
+router.put("/:id", updateStageName);
+router.post("/:id/update-project", updateProjectStages);
 
 export default router;

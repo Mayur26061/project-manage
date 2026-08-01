@@ -95,9 +95,9 @@ export const getMe = asyncHandler(async (req: reqObj, res: Response) => {
   res.status(200).json({ user });
 });
 
-export const getLimitedUsers = asyncHandler(
+export const getUsers = asyncHandler(
   async (req: reqObj, res: Response) => {
-    const data = limitFetchParams.parse(req.body);
+    const data = limitFetchParams.parse(req.query);
     const titleFilter: UserWhereInput = data.title
       ? {
         OR: [
@@ -110,11 +110,11 @@ export const getLimitedUsers = asyncHandler(
     const users = await prisma.user.findMany({
       where: titleFilter,
       select: { id: true, name: true },
-      take: 8,
+      take: data.limit,
       skip: data.offset,
       orderBy: { first_name: "asc" },
     });
-    res.json({ data: users });
+    res.json(users);
   }
 );
 
@@ -157,7 +157,7 @@ export const changePassword = asyncHandler(async (req: reqObj, res: Response) =>
         id: existUser.id,
       },
     });
-    res.redirect(307, "/api/user/logout");
+    res.redirect(307, "/api/auth/logout");
     return;
   }
 
@@ -172,7 +172,7 @@ const editProfileCheck = z.object({
   last_name: z.string().min(1),
 });
 
-export const editProfile = asyncHandler(async (req: reqObj, res: Response) => {
+export const updateProfile = asyncHandler(async (req: reqObj, res: Response) => {
   const userId = req.headers.uid;
   const existUser = await prisma.user.findUnique({
     where: { id: userId },

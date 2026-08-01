@@ -37,7 +37,7 @@ const ChangePasswordDialog = () => {
       return;
     }
     try {
-      await axios.post("/api/user/change-password", {
+      await axios.post("/api/auth/change-password", {
         oldPassword: old,
         newPassword: newpass,
         confirmPassword: confirm,

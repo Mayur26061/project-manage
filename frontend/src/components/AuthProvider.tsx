@@ -18,7 +18,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
   useEffect(() => {
     axios
-      .get("/api/user/me")
+      .get("/api/users/me")
       .then((response) => {
         setUser({ isLoading: false, user: response.data.user });
       })

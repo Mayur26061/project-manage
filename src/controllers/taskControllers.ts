@@ -1,8 +1,9 @@
 import type { Response, Request } from "express";
 import z from "zod";
 import { prisma } from "../lib/prisma.js";
-import { asyncHandler } from "../utils.js";
+import { asyncHandler, limitFetchParams } from "../utils.js";
 import type { Prisma } from "@/generated/prisma/client.js";
+import type { TaskWhereInput } from "@/generated/prisma/internal/prismaNamespaceBrowser.js";
 
 const taskCreateCheck = z.object({
   name: z.string().min(1),
@@ -33,8 +34,20 @@ const taskUpdateCheck = z.object({
 });
 
 
-export const getTasks = asyncHandler(async (_req: Request, res: Response) => {
-  const tasks = await prisma.task.findMany();
+export const getTasks = asyncHandler(async (req: Request, res: Response) => {
+  const data = limitFetchParams.parse(req.query);
+  const titleFilter: TaskWhereInput = data.title
+    ? {
+      name: { contains: data.title, mode: "insensitive" },
+      active: true,
+    }
+    : { active: true };
+  const tasks = await prisma.task.findMany({
+    where: titleFilter,
+    skip: data.offset,
+    take: data.limit,
+    orderBy: { created_at: "asc" },
+  });
   res.json(tasks);
 });
 
@@ -50,7 +63,7 @@ export const getProjectTasks = asyncHandler(
       where: { project: { id: projectId } },
       include: {
         stage: {
-          select: { id: true, name: true, sequence: true, tasks: { where: { project_id: projectId } } },
+          select: { id: true, name: true, sequence: true, tasks: { where: { project_id: projectId }, take: 10 /* update this with offset and limit */ } },
         },
       },
       orderBy: [

@@ -34,7 +34,7 @@ export const Stage = ({ stage, onTaskUpdate }: Props) => {
     const id = ev.dataTransfer.getData("text");
     if (stage.tasks.find((task) => task.id === Number(id))) return;
     try {
-      const response = await axios.put(`/api/task/update/${id}`, {
+      const response = await axios.put(`/api/tasks/${id}`, {
         stage_id: stage.id,
       });
       if (response.status !== 200) {
@@ -76,7 +76,7 @@ export const Stage = ({ stage, onTaskUpdate }: Props) => {
 
   const onCreateTask = async (name: string) => {
     try {
-      const response = await axios.post("/api/task/create", {
+      const response = await axios.post("/api/tasks", {
         name,
         stage_id: stage.id,
         project_id: stage.project_id,

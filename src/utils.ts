@@ -10,7 +10,8 @@ export interface reqObj extends Request {
 }
 
 export const limitFetchParams = z.object({
-    offset: z.number().optional().default(0),
+    offset: z.coerce.number().optional().default(0),
+    limit: z.coerce.number().max(200).optional().default(8),
     title: z.string().trim().optional(),
 });
 

@@ -3,7 +3,6 @@ import {
     getSelectedProject,
     createProject,
     getProjectStages,
-    getLimitedProjects,
     updateProject,
     deleteProject
 } from "../controllers/projectControllers.js";
@@ -11,12 +10,11 @@ import express from "express";
 
 const router = express.Router();
 
-router.get("/projects", getProjects);
+router.get("/", getProjects);
+router.post("/", createProject);
 router.get("/:id", getSelectedProject);
+router.put("/:id", updateProject);
+router.delete("/:id", deleteProject)
 router.get("/:id/stages", getProjectStages);
-router.post("/create", createProject);
-router.post("/limited", getLimitedProjects);
-router.put("/update/:id", updateProject);
-router.delete("/delete/:id", deleteProject)
 
 export default router;

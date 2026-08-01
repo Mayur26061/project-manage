@@ -38,7 +38,7 @@ function TasksComponent() {
   });
   const [data, setData] = useState<Result[]>([]);
   useEffect(() => {
-    axios.get(`/api/task/tasks/${params.projectId}`).then((response) => {
+    axios.get(`/api/tasks/projects/${params.projectId}`).then((response) => {
       setData(response.data.result);
     });
   }, []);
