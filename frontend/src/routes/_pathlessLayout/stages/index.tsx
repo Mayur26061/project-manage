@@ -42,19 +42,20 @@ function Stage() {
     }
   }, [edit]);
 
-  const onRecordUpdate = (
+  const onRecordUpdate = async (
     stageId: number,
     projectId: number,
     operation: "add" | "remove",
   ) => {
-    return axios
-      .post(`/api/stages/${stageId}/update-project`, {
-        project_id: projectId,
-        operation,
-      })
-      .catch((err) => {
-        console.error("Error updating stage projects:", err);
-      });
+    try {
+      return await axios
+        .post(`/api/stages/${stageId}/update-project`, {
+          project_id: projectId,
+          operation,
+        });
+    } catch (err) {
+      console.error("Error updating stage projects:", err);
+    }
   };
 
   const onRecordSelectorChange = async (
@@ -62,18 +63,14 @@ function Stage() {
     stageId: number,
   ): Promise<void> => {
     console.log("Selected project ID:", id);
+    if (stages.some((stage) => stage.projectStages.some((ps) => ps.project.id === id))) {
+      console.log("Project already exists in a stage, not adding again.");
+      return;
+    }
     await onRecordUpdate(stageId, id, "add");
     setStages((prev) =>
       prev.map((stage) => {
-        if (stage.id === stageId) {
-          if (stage.projectStages.some((ps) => ps.project.id === id)) {
-            return {
-              ...stage,
-              projectStages: [
-                ...stage.projectStages.filter((p) => p.project.id !== id),
-              ],
-            };
-          }
+        if (stage.id === stageId && !stage.projectStages.some((ps) => ps.project.id === id)) {
           return {
             ...stage,
             projectStages: [...stage.projectStages, { project: { id, name } }],

@@ -34,13 +34,29 @@ interface Project {
 
 function ProjectsComponent() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [projectCount, setProjectCount] = useState(0);
+  const [projectOffset, setProjectOffset] = useState(0);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    axios
-      .get("/api/projects")
-      .then((response) => setProjects(response.data));
-  }, []);
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get(
+        `/api/projects?limit=8&offset=${projectOffset}`,
+      );
+      setProjects(response.data.data);
+      setProjectCount(response.data.count);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
+
+  const onClickNext = () => {
+    setProjectOffset((prevOffset) => prevOffset + 8);
+  };
+
+  const onClickPrevious = () => {
+    setProjectOffset((prevOffset) => Math.max(0, prevOffset - 8));
+  };
 
   const openProjecConfig = (ev: React.MouseEvent, projectId: number) => {
     ev.preventDefault();
@@ -57,7 +73,11 @@ function ProjectsComponent() {
     try {
       const response = await axios.delete(`/api/projects/${projectId}`);
       if (response.status === 204) {
-        setProjects(projects.filter((p) => p.id !== projectId));
+        if (projectCount % 8 === 1 && projectOffset > 0) {
+          setProjectOffset((prevOffset) => Math.max(0, prevOffset - 8));
+        } else {
+          fetchProjects();
+        }
       }
     } catch (error) {
       console.error("Error deleting project:", error);
@@ -67,13 +87,21 @@ function ProjectsComponent() {
   const onCreateProject = async (name: string) => {
     try {
       const response = await axios.post("/api/projects", { name });
-      if (response.status === 201) {
+      if (response.status === 201 && projectCount - projectOffset < 8) {
         setProjects((preprojects) => [...preprojects, response.data.project]);
+      }
+      if (response.status === 201) {
+        setProjectCount((prevCount) => prevCount + 1);
       }
     } catch (error) {
       console.error("Error creating project:", error);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchProjects();
+  }, [projectOffset]);
 
   return (
     <>
@@ -83,6 +111,25 @@ function ProjectsComponent() {
           <SimpleCreateDialog title="Create Project" onSave={onCreateProject}>
             <Button variant="outline">Create Project</Button>
           </SimpleCreateDialog>
+          {projectCount > 0 && (
+            <>
+              Total Projects: {projectCount}
+              <span className="text-gray-500 text-sm">
+                {parseInt(String(projectOffset / 8 + 1))}/
+                {parseInt(String(projectCount / 8)) +
+                  (projectCount % 8 > 0 ? 1 : 0)}
+              </span>
+              <Button disabled={projectOffset === 0} onClick={onClickPrevious}>
+                Previous
+              </Button>
+              <Button
+                disabled={projectOffset + 8 >= projectCount}
+                onClick={onClickNext}
+              >
+                Next
+              </Button>
+            </>
+          )}
         </div>
         {projects.map((project) => (
           <div

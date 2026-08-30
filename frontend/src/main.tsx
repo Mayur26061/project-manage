@@ -33,9 +33,9 @@ function InnerApp() {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  // <StrictMode>
     <AuthProvider>
       <InnerApp />
     </AuthProvider>
-  </StrictMode>,
+  // </StrictMode>,
 );

@@ -28,7 +28,7 @@ const RecordSelector = (props: Props) => {
     try {
       const response = await axios.get(`/api/${props.model}?offset=0&title=${title}`);
       if (response.status === 200) {
-        setDropdownData({ isLoading: false, records:  response.data.map((d: any)=> ({id: d.id, name: d.name})) });
+        setDropdownData({ isLoading: false, records:  response.data.data.map((d: any)=> ({id: d.id, name: d.name})) });
       }
     } catch (error) {
       console.error("Error fetching records:", error);

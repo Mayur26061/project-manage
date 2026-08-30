@@ -36,7 +36,8 @@ export const getProjects = asyncHandler(async (req: reqObj, res: Response) => {
       customer: { select: { id: true, name: true } },
     },
   });
-  res.json(projects);
+  const count = await prisma.project.count({ where: titleFilter });
+  res.json({ data: projects, count });
 });
 
 export const getSelectedProject = asyncHandler(

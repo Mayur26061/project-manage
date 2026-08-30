@@ -114,7 +114,7 @@ export const getUsers = asyncHandler(
       skip: data.offset,
       orderBy: { first_name: "asc" },
     });
-    res.json(users);
+    res.json({ data: users});
   }
 );
 
