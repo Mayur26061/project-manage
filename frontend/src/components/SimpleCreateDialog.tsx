@@ -40,6 +40,10 @@ export function SimpleCreateDialog({
               type="button"
               onClick={() => {
                 const name = nameInputRef.current?.value || "";
+                if (!name.trim()) {
+                  alert("Name cannot be empty");
+                  return;
+                }
                 onSave(name.trim());
               }}
             >
