@@ -6,6 +6,7 @@ import type { StageWhereInput } from "@/generated/prisma/internal/prismaNamespac
 
 const stageCreateCheck = z.object({
     name: z.string().min(1),
+    project_id: z.number().gt(0).optional(),
 });
 
 const deleteStageCheck = z.object({
@@ -48,6 +49,9 @@ export const createStage = asyncHandler(async (req: reqObj, res: Response) => {
     const stage = await prisma.stage.create({
         data: {
             name: result.name,
+            projectStages: {
+                create: result.project_id ? [{ project: { connect: { id: result.project_id } } }] : []
+            }
         },
     });
     res.status(201).json({ stage });

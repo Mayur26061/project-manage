@@ -113,17 +113,17 @@ export const Stage = ({ stage, onTaskUpdate }: Props) => {
         ev.preventDefault();
       }}
     >
-      <div className="border border-gray-300 rounded-lg p-2 shadow-sm bg-white">
+      <div className="border border-gray-300 rounded-lg p-2 shadow-sm bg-white flex items-center justify-between">
         {stage.name}
+        <SimpleCreateDialog title="Create a Task" onSave={onCreateTask}>
+          <div className=" text-gray-500 cursor-pointer">
+            <PlusCircle />
+          </div>
+        </SimpleCreateDialog>
       </div>
       {stage.tasks.map((task) => (
         <TaskBox key={task.id} task={task} />
       ))}
-      <SimpleCreateDialog title="Create a Task" onSave={onCreateTask}>
-        <div className="border border-gray-300 rounded-lg p-2 shadow-sm bg-white flex items-center justify-center gap-2 text-sm text-gray-500 cursor-pointer">
-          <PlusCircle /> New Task
-        </div>
-      </SimpleCreateDialog>
     </div>
   );
 };
