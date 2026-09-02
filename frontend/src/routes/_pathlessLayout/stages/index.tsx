@@ -63,7 +63,7 @@ function Stage() {
     stageId: number,
   ): Promise<void> => {
     console.log("Selected project ID:", id);
-    if (stages.some((stage) => stage.projectStages.some((ps) => ps.project.id === id))) {
+    if (stages.some((stage) => stage.id === stageId && stage.projectStages.some((ps) => ps.project.id === id))) {
       console.log("Project already exists in a stage, not adding again.");
       return;
     }
