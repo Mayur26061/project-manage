@@ -176,3 +176,37 @@ export const deleteTask = asyncHandler(async (req: Request, res: Response) => {
   await prisma.task.delete({ where: { id: taskId } });
   res.status(204).send();
 });
+
+export const getMyTasks = asyncHandler(async (req, res) => {
+  const userId = req.headers.uid;
+  if (!userId) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+  const query = z.object({
+    offset: z.coerce.number().int().min(0).default(0),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    title: z.string().trim().max(120).optional(),
+    status: z.enum(["APPROVED", "IN_PROGRESS", "CHANGE_REQUESTED", "DONE"]).optional(),
+  }).parse(req.query);
+  const where: Prisma.TaskWhereInput = {
+      active: true,
+      taskAssignments: { some: { user_id: userId } },
+      ...(query.title ? { name: { contains: query.title, mode: "insensitive" as const } } : {}),
+      ...(query.status ? { status: query.status } : {}),
+  };
+  const [tasks, total] = await Promise.all([
+    prisma.task.findMany({
+      where,
+      skip: query.offset,
+      take: query.limit,
+      include: {
+        project: { select: { id: true, name: true } },
+        stage: { select: { id: true, name: true } },
+      },
+      orderBy: [{ deadline: "asc" }, { created_at: "desc" }],
+    }),
+    prisma.task.count({ where }),
+  ]);
+  res.json({ tasks, total, offset: query.offset, limit: query.limit });
+});

@@ -30,8 +30,8 @@ export const authenticateToken = (
         if (Number(userPayload.id)) {
             req.headers.uid = Number(userPayload.id);
         }
+        next();
     });
-    next();
 };
 
 const getCookieToken = (cookie: string | undefined, cname: string) => {

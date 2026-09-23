@@ -63,6 +63,11 @@ const Sidebar = ({ className = "", setOpenSidebar }: SidebarProps) => {
               <span>Projects</span>
             </div>
           </Link>
+          <Link to={"/my-tasks"} onClick={() => setOpenSidebar(false)}>
+            <div className="flex items-center gap-3 px-8 py-4 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 border-b-[1.5px] border-gray-200">
+              <span>My Tasks</span>
+            </div>
+          </Link>
         </div>
       </div>
     </div>
